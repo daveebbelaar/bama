@@ -1,0 +1,3 @@
+interface:
+  display_name: "New Mac App"
+  short_description: "Scaffold a SwiftUI Mac app"

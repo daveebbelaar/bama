@@ -1,0 +1,3 @@
+interface:
+  display_name: "Design Kit"
+  short_description: "Custom SwiftUI parts, tokens, icons, chrome, and a gallery"

@@ -1,0 +1,3 @@
+interface:
+  display_name: "Improve Architecture"
+  short_description: "Check-ins and safe refactors as the app grows"

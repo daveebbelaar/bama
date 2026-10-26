@@ -1,0 +1,27 @@
+{
+  "name": "bama",
+  "owner": {
+    "name": "Dave Ebbelaar",
+    "url": "https://github.com/daveebbelaar"
+  },
+  "description": "Build any Mac app. Agent skills for native macOS apps with Swift and SwiftUI.",
+  "plugins": [
+    {
+      "name": "bama",
+      "source": "./",
+      "description": "Build any Mac app: skills to research, clone, plan, scaffold, design, integrate, optimize, test, and ship native macOS apps with Swift and SwiftUI.",
+      "category": "development",
+      "keywords": [
+        "macos",
+        "swift",
+        "swiftui",
+        "swiftdata",
+        "liquid-glass",
+        "computer-use",
+        "clone",
+        "performance",
+        "skills"
+      ]
+    }
+  ]
+}

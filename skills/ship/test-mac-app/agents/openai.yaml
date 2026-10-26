@@ -1,0 +1,3 @@
+interface:
+  display_name: "Test Mac App"
+  short_description: "Unit tests, self-test, debug bridge"

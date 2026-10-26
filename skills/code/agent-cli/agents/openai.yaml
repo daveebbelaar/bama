@@ -1,0 +1,3 @@
+interface:
+  display_name: "Agent CLI"
+  short_description: "Let Claude Code, Codex, and scripts drive your Mac app through a CLI and MCP"
