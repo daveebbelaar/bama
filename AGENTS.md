@@ -2,7 +2,8 @@
 
 Agent skills for building native macOS apps. Installed as a Claude Code and
 Codex plugin from `.claude-plugin/`, or through `npx skills add`.
-`AGENTS.md` is a copy of this file; keep them identical.
+`AGENTS.md` at the root is a copy of this file (`.claude/CLAUDE.md`);
+keep them identical.
 
 ## Layout
 
