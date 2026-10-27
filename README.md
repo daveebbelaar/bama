@@ -37,8 +37,6 @@ Screenshot every screen, write the user stories, and build milestone 1.
 
 Not sure where to start? Type `/bama`. It looks at your project and picks the next skill.
 
-<sub>Prompts like this are faster to say than to type. [Glaido](https://go.glaido.com/d4uhYE6) turns your voice into a clean prompt right inside Claude Code, Codex, or any other app, so you never leave the flow. We make Glaido, so we are biased. It has a free plan.</sub>
-
 ## How it works
 
 <table>
@@ -154,7 +152,6 @@ bama/scripts/link-skills.sh       # links every skill into ~/.claude/skills and 
 - Xcode 26 or later, for the Swift 6.2 toolchain (you never open it)
 - An agent that supports skills: Claude Code, Codex, Cursor, Gemini CLI
 - For `clone` on native apps: computer use (Claude Pro or Max)
-- Optional: [Glaido](https://go.glaido.com/d4uhYE6), to speak your prompts and feedback instead of typing them
 
 ## Credits
 
