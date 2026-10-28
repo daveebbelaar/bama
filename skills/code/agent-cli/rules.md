@@ -96,8 +96,9 @@ of Optical Flow and Onyx.
 - `check-agent-cli.sh <cli>` after every new command.
 - Keep the parsing and result code in plain functions, and give each
   command one test in the app's tests with a test store.
-- Before each release, let a fresh `claude -p` session do one real task
-  with only `<cli> help` to go on. If it gets lost, the help text is wrong.
+- Before each release, ask the user to test one read-only task in a fresh
+  Claude Code or Codex session with only `<cli> help` to go on. If it gets
+  lost, improve the help text. Report clients that were not tested.
 
 ## What not to build
 

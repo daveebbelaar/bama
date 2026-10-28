@@ -4,7 +4,12 @@ description: Rebuild the look of an app the user likes as a native SwiftUI desig
 argument-hint: "<app name or screenshot paths>"
 ---
 
+Agent setup: [Claude Code and Codex](../../../docs/agent-compatibility.md).
+
 # Design from app
+
+Set `BAMA_SKILL_DIR` to the absolute folder containing this `SKILL.md`
+before running its scripts. See the agent setup link above.
 
 Look at an app, measure it, and rebuild its design system in SwiftUI. The
 result is a design kit (`design-kit` skill) with the reference app's
@@ -18,7 +23,7 @@ measuring, next to this skill:
 - `scripts/compare.swift`: a side-by-side, a diff, and the share of pixels
   that differ.
 
-Run them with `swift "${CLAUDE_SKILL_DIR}/scripts/measure.swift" ...`.
+Run them with `swift "${BAMA_SKILL_DIR}/scripts/measure.swift" ...`.
 All coordinates are points (pixels / 2 for a Retina capture).
 
 ## 1. Get the screenshots
@@ -76,7 +81,7 @@ and weight.
 
 ## 5. Build the kit and one screen
 
-Call the Skill tool with `design-kit` and build the tokens, the parts, the
+Load the `design-kit` skill and build the tokens, the parts, the
 window chrome, and the gallery from `design/KIT.md`. Then build the main
 screenshot's screen from kit parts only, with the same data and the same
 window size.
@@ -87,8 +92,8 @@ reference.
 ## 6. Compare until it matches
 
 ```bash
-swift "${CLAUDE_SKILL_DIR}/scripts/compare.swift" design/reference/main.png /tmp/<App>-shots/<page>-light.png /tmp/<App>-compare
-swift "${CLAUDE_SKILL_DIR}/scripts/compare.swift" ... /tmp/<App>-compare-sidebar 0 0 220 300
+swift "${BAMA_SKILL_DIR}/scripts/compare.swift" design/reference/main.png /tmp/<App>-shots/<page>-light.png /tmp/<App>-compare
+swift "${BAMA_SKILL_DIR}/scripts/compare.swift" ... /tmp/<App>-compare-sidebar 0 0 220 300
 ```
 
 Open `side-by-side.png` and `diff.png` with the Read tool. Then measure

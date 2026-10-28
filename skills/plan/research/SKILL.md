@@ -4,6 +4,8 @@ description: Online research for a macOS app before building it, run as parallel
 argument-hint: "<app category or question>"
 ---
 
+Agent setup: [Claude Code and Codex](../../../docs/agent-compatibility.md).
+
 # Research
 
 Research answers three questions before code exists: what the best apps in
@@ -19,7 +21,9 @@ on the Mac".
 
 ## 2. Fan out
 
-Start one subagent per track, in parallel, with the brief below. Pick the
+Use one subagent per track when the client permits delegation. Batch them
+to its concurrency limit; run tracks serially when subagents are unavailable.
+Use the brief below. Pick the
 tracks that fit. Four is typical. Market and Reviews always run. Reviews
 covers many apps: give each subagent 3 or 4 apps, or the 600 words run out.
 
@@ -87,10 +91,10 @@ reference app).
 
 ## 4. Hand off
 
-Call the Skill tool with `clone` if one app stands out as the reference
+Load the `clone` skill if one app stands out as the reference
 and you can open it. If it is not installed, or computer use and a browser
 are not available, link its public help pages and screenshots in the
-research file instead. Then call the Skill tool with `app-brief`.
+research file instead. Then load the `app-brief` skill.
 
 Done when every track returned, the file has a likes and dislikes table
 for every app in the market list, a feature matrix, and a decision list,

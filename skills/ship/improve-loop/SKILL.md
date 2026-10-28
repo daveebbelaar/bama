@@ -4,6 +4,8 @@ description: Autonomous loop that works through docs/STORIES.md one story at a t
 argument-hint: "[milestone, e.g. M1]"
 ---
 
+Agent setup: [Claude Code and Codex](../../../docs/agent-compatibility.md).
+
 # Improve loop
 
 One pass through the loop takes one story from `todo` to `done`:
@@ -23,7 +25,7 @@ milestone whose dependencies are `done`. Set it to `doing`.
 ## 2. Plan
 
 If the story adds a screen, an action, or words and has no `UX:` block
-yet, call the Skill tool with `ux-design` first.
+yet, load the `ux-design` skill first.
 
 Write two to five lines in your head or in the commit body: which files
 change, which model fields are new, which menu command and shortcut it adds,
@@ -97,8 +99,7 @@ Then `./build.sh --open` so the user can try the new build.
 
 ## Milestone check-in
 
-When the last story of a milestone is `done`, call the Skill tool with
-`improve-architecture` before you start the next milestone. Unattended, do
+When the last story of a milestone is `done`, load the `improve-architecture` skill before you start the next milestone. Unattended, do
 its top recommendation only if it is `Strong`, and leave the rest in the
 review file for the user.
 

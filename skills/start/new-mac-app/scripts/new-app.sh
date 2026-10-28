@@ -24,6 +24,8 @@ mv "$dest/Tests/__APP_NAME__KitTests" "$dest/Tests/${name}KitTests"
 grep -rlI "__APP_NAME__\|__BUNDLE_ID__" "$dest" | while read -r f; do
   sed -i '' -e "s/__APP_NAME__/$name/g" -e "s/__BUNDLE_ID__/$bundle/g" "$f"
 done
+# Codex reads AGENTS.md; keep an existing project instruction file.
+[[ -e "$dest/AGENTS.md" ]] || cp "$dest/CLAUDE.md" "$dest/AGENTS.md"
 chmod +x "$dest/build.sh" "$dest/tools/make_icon.sh" "$dest/tools/icon_review.sh" "$dest/tools/grid-lint.sh" "$dest/tools/check-layout.swift" "$dest/tools/snap.sh" "$dest/tools/selftest.sh"
 
 cd "$dest"

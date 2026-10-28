@@ -3,11 +3,13 @@ name: swift-swiftui
 description: Swift 6 and SwiftUI code rules for macOS apps, including concurrency, state, SwiftData, AppKit bridges, and fixes for common compiler errors. Use when writing, reviewing, or debugging Swift code in a Mac app, or on concurrency, Sendable, or "not in scope" errors.
 ---
 
+Agent setup: [Claude Code and Codex](../../../docs/agent-compatibility.md).
+
 # Swift and SwiftUI
 
 The code is right when it compiles with zero warnings in Swift 6 language
-mode and the app does what the story says. For how it should look, call the
-Skill tool with `mac-design`. For copyable view code, read
+mode and the app does what the story says. For how it should look, load the
+`mac-design` skill. For copyable view code, read
 [../../design/mac-design/patterns.md](../../design/mac-design/patterns.md).
 
 ## Concurrency

@@ -3,6 +3,8 @@ name: design-kit
 description: Custom design system for a macOS SwiftUI app with its own parts, not Apple's, covering three token layers, type, an icon set, every part in every state, custom window chrome, a parts gallery, and checks. Use when the user wants the app to have its own look and feel, a brand, or custom buttons, rows, and sidebars, when design-from-app has measured a reference app, or when the user asks for a design system or component library.
 ---
 
+Agent setup: [Claude Code and Codex](../../../docs/agent-compatibility.md).
+
 # Design kit
 
 A native look comes from Apple's parts. A custom look comes from your own
@@ -12,7 +14,7 @@ page that shows every part in every state.
 
 Most apps keep Apple's parts and only pick an accent color (`design-system`
 skill). Build a kit when the parts themselves must change. To copy the look of an existing app,
-call the Skill tool with `design-from-app` first: it measures the app and
+load the `design-from-app` skill first: it measures the app and
 then comes back here.
 
 Everything lives in `Sources/<App>/DesignKit/`. Code for every step:

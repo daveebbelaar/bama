@@ -4,9 +4,11 @@ description: Build any Mac app. Start here to pick the next skill for a native m
 disable-model-invocation: true
 ---
 
+Agent setup: [Claude Code and Codex](../../../docs/agent-compatibility.md).
+
 # Build any Mac app
 
-Find where the user is on the path below, then call the Skill tool with the
+Find where the user is on the path below, then load the
 skill for that step. One skill per call.
 
 ```text

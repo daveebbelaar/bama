@@ -13,7 +13,7 @@ rest.
 
 ## The app's agent skill
 
-Save as `.claude/skills/<cli>/SKILL.md` in the app's repo. Replace the
+Save as `.agents/skills/<cli>/SKILL.md` in the app's repo. Replace the
 angle brackets. Keep it under 60 lines: list the five commands used most,
 and point at `help` for the rest.
 
@@ -55,12 +55,14 @@ Everything else: `<cli> help`, and `<cli> help <command>` for its options.
 
 | Place | Who sees it |
 | --- | --- |
-| `.claude/skills/<cli>/SKILL.md` in the app's repo | Agents working on the app's code |
+| `.agents/skills/<cli>/SKILL.md` in the app's repo | Codex working on the app's code |
+| `.claude/skills/<cli>` linked to that directory | Claude Code working on the same app |
 | `~/.claude/skills/<cli>/SKILL.md` | Claude Code in any folder: "add milk to my tasks" works everywhere |
-| `~/.codex/skills/<cli>/SKILL.md` (or `AGENTS.md`) | Codex |
+| `~/.agents/skills/<cli>/SKILL.md` | Codex in any folder |
 
-Copy the same file to each place the user wants. Update all of them when a
-command changes.
+Keep one canonical skill directory. Link it into the other requested
+client directory, preserving existing files. Document its path in the app's
+`AGENTS.md` and `CLAUDE.md`. Update that one skill when a command changes.
 
 ## Permissions
 
@@ -76,7 +78,7 @@ Ask the user before changing their settings.
 
 ## MCP registration
 
-Only when the user wants MCP (Claude Desktop, or one prompt per tool).
+Only when the user wants MCP in Codex, Claude Desktop, or another client.
 Always the full path to the binary inside the app: MCP clients do not read
 the shell's `PATH`.
 
@@ -84,6 +86,7 @@ the shell's `PATH`.
 claude mcp add --scope user <cli> -- ~/Applications/<App>.app/Contents/MacOS/<App> mcp
 claude mcp list            # shows <cli> as connected
 codex mcp add <cli> -- ~/Applications/<App>.app/Contents/MacOS/<App> mcp
+codex mcp get <cli>       # verifies registration, not a live connection
 ```
 
 Claude Desktop, in `~/Library/Application Support/Claude/claude_desktop_config.json`:
@@ -92,7 +95,9 @@ Claude Desktop, in `~/Library/Application Support/Claude/claude_desktop_config.j
 { "mcpServers": { "<cli>": { "command": "/Users/<you>/Applications/<App>.app/Contents/MacOS/<App>", "args": ["mcp"] } } }
 ```
 
-Restart Claude Desktop after editing. Its logs are in
+Restart or reconnect the selected client, then call a read-only MCP tool
+from that client to verify the connection. Restart Claude Desktop after
+editing its file. Its logs are in
 `~/Library/Logs/Claude/mcp-server-<cli>.log`.
 
 Tools are named like the commands with `_` for spaces (`items_add`), carry

@@ -4,7 +4,12 @@ description: Walk through any existing app (native Mac app with computer use, we
 argument-hint: "<app name as shown in the menu bar, or a URL>"
 ---
 
+Agent setup: [Claude Code and Codex](../../../docs/agent-compatibility.md).
+
 # Clone
+
+Set `BAMA_SKILL_DIR` to the absolute folder containing this `SKILL.md`
+before running its scripts. See the agent setup link above.
 
 Output: a folder of screenshots, one index that describes everything the
 app shows, and a backlog built from it.
@@ -22,14 +27,16 @@ docs/STORIES.md      (from the user-stories skill)
 
 | The app is | Use |
 | --- | --- |
-| A native Mac app, or Electron | Computer use (`mcp__computer-use__*`) |
+| A native Mac app, or Electron | The client's computer-use tools; Codex desktop: `cua_repl` |
 | A web app | A browser tool: the built-in browser, Claude in Chrome, or Playwright |
 
-Computer use needs a Pro or Max plan, and Accessibility and Screen
-Recording permissions. Claude desktop: Settings > This computer > Enable
+In Claude, computer use needs a Pro or Max plan, and Accessibility and
+Screen Recording permissions. Claude desktop: Settings > This computer > Enable
 computer use. Claude Code CLI: `/mcp` > `computer-use` > Enable. Ask for
 access to the reference app only. Browsers are view-only and terminals are
-click-only for computer use.
+click-only for Claude computer use. In Codex, use the provided computer
+and browser APIs under their own tool rules. If they are unavailable, use
+supplied screenshots and report the missing live coverage.
 
 ## 2. Agree on privacy
 
@@ -39,16 +46,18 @@ close dialogs. Type, create, change, or delete only when the user says so.
 
 ## 3. Save real files
 
-Computer use screenshots come to you downscaled, not to disk. Save each
-screen at full resolution with the script in this skill:
+Use the computer or browser tool's screenshot export when it can save a
+file. When that tool permits shell capture, the script below saves the app
+window at full resolution:
 
 ```bash
-"${CLAUDE_SKILL_DIR}/scripts/window-shot.sh" "<App Name>" docs/screens/01-inbox.png
+"${BAMA_SKILL_DIR}/scripts/window-shot.sh" "<App Name>" docs/screens/01-inbox.png
 ```
 
-It captures the app's largest window. For menus and popovers outside the
-window, use `screencapture -x docs/screens/<name>.png` and note it in the
-index. In a browser, use the tool's screenshot with a file path.
+It captures the app's largest window. When shell capture is permitted,
+use `screencapture -x docs/screens/<name>.png` for menus and popovers outside
+the window and note it in the index. Otherwise use the tool's screenshot
+API. In a browser, use its screenshot export with a file path when available.
 
 ## 4. Walk the app in this order
 
@@ -109,7 +118,7 @@ out of public repos (add `docs/screens/*.png` to `.gitignore`).
 
 ## 6. Turn it into stories
 
-Call the Skill tool with `user-stories`. Every screen in the index ends up
+Load the `user-stories` skill. Every screen in the index ends up
 linked from at least one story, or listed under `## Dropped`.
 
 Done when INDEX.md has a section per PNG, the three maps exist, and

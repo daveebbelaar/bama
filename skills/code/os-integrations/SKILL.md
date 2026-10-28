@@ -3,6 +3,8 @@ name: os-integrations
 description: Deep macOS integrations for a native app, such as global hotkeys, menu bar items, floating panels, window control with Accessibility, screen capture and recording, clipboard, Shortcuts and Spotlight, URL schemes, login items, a CLI, and the permissions each one needs. Use when an app must reach outside its own window or control other apps.
 ---
 
+Agent setup: [Claude Code and Codex](../../../docs/agent-compatibility.md).
+
 # macOS integrations
 
 A Mac app is a set of entry points around the system, not one window. This

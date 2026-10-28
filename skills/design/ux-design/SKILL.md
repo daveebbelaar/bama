@@ -4,6 +4,8 @@ description: UX pass for one feature of a macOS app, covering names, flow, where
 argument-hint: "[story ID or screen]"
 ---
 
+Agent setup: [Claude Code and Codex](../../../docs/agent-compatibility.md).
+
 # UX design
 
 A feature that works can still confuse people. This pass decides what

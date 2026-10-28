@@ -3,6 +3,8 @@ name: performance
 description: Make a macOS app fast by measuring hangs, stutter, CPU, memory, and energy, then moving work off the main thread and onto the GPU. Use when the app freezes, a shortcut feels slow, dragging stutters, the fan spins, memory grows, or the user asks to optimize or profile.
 ---
 
+Agent setup: [Claude Code and Codex](../../../docs/agent-compatibility.md).
+
 # Performance
 
 Fast means two numbers: the first frame after a key press shows in under

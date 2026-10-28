@@ -5,7 +5,12 @@ argument-hint: "<AppName> <bundle-id> [parent-folder]"
 allowed-tools: Bash(*/new-app.sh *) Bash(git *) Bash(swift *) Read Write Edit
 ---
 
+Agent setup: [Claude Code and Codex](../../../docs/agent-compatibility.md).
+
 # New Mac app
+
+Set `BAMA_SKILL_DIR` to the absolute folder containing this `SKILL.md`
+before running its scripts. See the agent setup link above.
 
 The template builds and runs as is. The first build proves the toolchain
 works before you write feature code.
@@ -21,7 +26,8 @@ binary in a real `.app` bundle. An agent can read and edit every file.
   Info.plist.in          bundle id, name, icon, minimum macOS
   Icon/AppIcon.icon      the app icon: Icon Composer file, JSON plus SVG layers
   build.sh               swift build -> .app bundle -> codesign -> ~/Applications
-  CLAUDE.md              build, check, and design rules for agents
+  AGENTS.md              build, check, and design rules for Codex
+  CLAUDE.md              the same rules for Claude Code
   Sources/<AppName>/
     App.swift            window, menus, Settings, database location
     Models.swift         SwiftData models, sidebar pages, AppModel
@@ -60,7 +66,7 @@ binary in a real `.app` bundle. An agent can read and edit every file.
    that holds only a brief.
 
    ```bash
-   "${CLAUDE_SKILL_DIR}/scripts/new-app.sh" Tasks com.yourname.tasks ~/Developer
+   "${BAMA_SKILL_DIR}/scripts/new-app.sh" Tasks com.yourname.tasks ~/Developer
    ```
 
    In a Dropbox or iCloud Drive folder the script can take minutes: run it
@@ -104,8 +110,7 @@ time.
 
 ## A CLI for agents
 
-To let Claude Code, Codex, or scripts read and change the app's data, call
-the Skill tool with `agent-cli`. The app binary becomes its own CLI and
+To let Claude Code, Codex, or scripts read and change the app's data, load the `agent-cli` skill. The app binary becomes its own CLI and
 sends each command to the running app, so the database keeps one writer
 and the window updates live.
 
@@ -114,7 +119,7 @@ and the window updates live.
 - `cannot find 'X' in scope` after adding a file: SwiftPM cached the file
   list. Run `swift package clean --scratch-path ~/Library/Developer/<AppName>/build`.
 - `binary is older than ...`: a file did not compile. Read the first errors.
-- Concurrency errors: call the Skill tool with `swift-swiftui`.
+- Concurrency errors: load the `swift-swiftui` skill.
 
 Done when the app opens from `~/Applications`, the snapshots show every
 page in light and dark, and the first commit exists.

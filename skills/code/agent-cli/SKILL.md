@@ -4,7 +4,12 @@ description: Optional command line and MCP server for a macOS app, so Claude Cod
 argument-hint: "<cli-name, like tasks or mail>"
 ---
 
+Agent setup: [Claude Code and Codex](../../../docs/agent-compatibility.md).
+
 # Agent CLI
+
+Set `BAMA_SKILL_DIR` to the absolute folder containing this `SKILL.md`
+before running its scripts. See the agent setup link above.
 
 Give the app a command line, so an agent can do everything a person can
 do in the window: `tasks items add --title "Call the dentist"`. The app
@@ -12,8 +17,8 @@ binary is the CLI. Each command goes to the running app over a private
 socket, runs there like a button press, and the window updates live.
 
 ```text
-Claude Code --bash--> tasks items add ...  --socket--> Tasks.app (runs the command, saves, redraws)
-Claude Desktop --MCP--> tasks mcp           --socket--> same commands, same app
+Claude Code / Codex --shell--> tasks items add ... --socket--> Tasks.app
+Claude Desktop / Codex --MCP--> tasks mcp          --socket--> same commands
 ```
 
 ## CLI, MCP, or App Intents
@@ -21,7 +26,7 @@ Claude Desktop --MCP--> tasks mcp           --socket--> same commands, same app
 | Way in | Who uses it | Ship it |
 | --- | --- | --- |
 | CLI | Claude Code, Codex, scripts, people in Terminal | Always. Agents learn it from `--help`, and it costs no context until used |
-| MCP (`tasks mcp`) | Claude Desktop and other clients with no shell | Optional. The same commands, one tool each. One line to register |
+| MCP (`tasks mcp`) | Codex, Claude Desktop, and other MCP clients | Optional. The same commands, one tool each. One line to register |
 | App Intents | Siri, Spotlight, Shortcuts | Separate work. Agents cannot call them |
 
 The CLI talks to the running app, never to the database file. Then there is
@@ -47,7 +52,7 @@ Check: every M1 story has its commands, and each command is marked.
 ## 2. Add the files
 
 ```bash
-"${CLAUDE_SKILL_DIR}/scripts/add-agent-cli.sh" <app-folder> <cli-name>
+"${BAMA_SKILL_DIR}/scripts/add-agent-cli.sh" <app-folder> <cli-name>
 ```
 
 It copies `Sources/<App>/Agent/` (core, socket, CLI, MCP, example
@@ -95,7 +100,7 @@ Check: `<cli-name> --version` prints the app's version.
 ## 5. Test
 
 ```bash
-"${CLAUDE_SKILL_DIR}/scripts/check-agent-cli.sh" <cli-name>
+"${BAMA_SKILL_DIR}/scripts/check-agent-cli.sh" <cli-name>
 ```
 
 It starts a test copy of the app on a temporary database, checks help,
@@ -108,15 +113,15 @@ Check: the script prints `PASS agent CLI`.
 
 ## 6. Teach agents
 
-Write `.claude/skills/<cli-name>/SKILL.md` in the app's repo from
-[teach-agents.md](teach-agents.md): what the app is, the safety rules,
-the main commands, and "run `<cli-name> help` for the rest". To use the
-app from any folder, also copy it to `~/.claude/skills/<cli-name>/`. Add
-one line to the app's `CLAUDE.md`: "Drive the app with `<cli-name>`. See
-`.claude/skills/<cli-name>/SKILL.md`."
+Write the app skill at `.agents/skills/<cli-name>/SKILL.md` from
+[teach-agents.md](teach-agents.md). Expose the same skill through
+`.claude/skills/<cli-name>/` for Claude Code, using a symlink rather than a
+second maintained copy. Keep existing skills intact. For use from any folder,
+install it in the user skill directory for each requested client.
 
-Check: a fresh `claude -p "List my starred items with <cli-name>"` finds
-the CLI and answers from real data.
+Add the app skill path to `AGENTS.md` for Codex and `CLAUDE.md` for Claude Code.
+Check: a fresh session in the selected client finds the skill and completes a
+read-only task with real data. Do not run a new model session automatically.
 
 ## 7. MCP, when the user wants it
 
@@ -131,9 +136,11 @@ Claude Desktop: add it to `~/Library/Application Support/Claude/claude_desktop_c
 under `mcpServers`, with the full path and `"args": ["mcp"]`. More in
 [teach-agents.md](teach-agents.md).
 
-Check: `claude mcp list` shows the server as connected.
+Check registration with `codex mcp get <cli-name>` or `claude mcp list`,
+depending on the client. Then call a read-only tool from the client to prove
+the connection; a registration listing alone does not establish readiness.
 
 Done when every command from step 1 runs through the CLI against the
 running app, `check-agent-cli.sh` prints `PASS agent CLI`, the app's repo
-has the agent skill from step 6, and a fresh Claude Code session can do a
+has the agent skill from step 6, and a fresh session in the selected agent can do a
 real task with it.

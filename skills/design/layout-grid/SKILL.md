@@ -3,6 +3,8 @@ name: layout-grid
 description: Grid and alignment rules for a macOS SwiftUI app, with three checks that catch misalignment (a lint for off-grid numbers, a layout probe that measures real frames in snapshot mode, and a grid overlay). Use when building or reviewing a custom page, card, row, form, or sheet, after every build that touched layout, or when the user says something looks misaligned, crooked, cramped, or unevenly spaced.
 ---
 
+Agent setup: [Claude Code and Codex](../../../docs/agent-compatibility.md).
+
 # Layout grid
 
 Agents guess numbers. A guessed `.padding(13)` looks almost right and

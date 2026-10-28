@@ -3,6 +3,8 @@ name: design-system
 description: Accent color and design system for a macOS app, from the app's accent and the accent picker in Settings to Swift tokens in code plus a design/DESIGN-SYSTEM.md that says which token to use when. Use when the user wants a brand or accent color, wants people to pick a color, when an app has more than a few screens, when screens drift apart or animations feel inconsistent, or when the user asks for themes, a style guide, or design tokens.
 ---
 
+Agent setup: [Claude Code and Codex](../../../docs/agent-compatibility.md).
+
 # Design system
 
 A design system is a short list of **tokens** in code and one page that
@@ -14,8 +16,7 @@ Start from `mac-design`. Tokens cover only what the system does not:
 the accent, custom surfaces, radii, motion, overlays, and custom controls.
 
 The app keeps Apple's look. Only the accent color changes. For parts of
-your own (a custom sidebar, buttons, icons), call the Skill tool with
-`design-kit`. To copy the look of an app the user names, call it with
+your own (a custom sidebar, buttons, icons), load the `design-kit` skill. To copy the look of an app the user names, call it with
 `design-from-app`.
 
 The template already has the base in `Sources/<App>/UI/`:

@@ -4,6 +4,8 @@ description: Build a SwiftUI macOS app from the command line, install it, and ch
 allowed-tools: Bash(./build.sh*) Bash(swift *) Bash(tools/*) Bash(*/Contents/MacOS/*) Bash(open *) Read
 ---
 
+Agent setup: [Claude Code and Codex](../../../docs/agent-compatibility.md).
+
 # Build and verify
 
 A change is done when four things are true:
@@ -103,7 +105,7 @@ tools/grid-lint.sh
 swift tools/check-layout.swift /tmp/<AppName>-shots/*-layout.json
 ```
 
-Both print PASS. On a FAIL, call the Skill tool with `layout-grid`: it has
+Both print PASS. On a FAIL, load the `layout-grid` skill: it has
 the rules, the overlay, and a table of fixes.
 
 ## 4. Look

@@ -4,6 +4,8 @@ description: One-page brief (docs/BRIEF.md) for a new macOS app, written before 
 argument-hint: "[idea in a few words]"
 ---
 
+Agent setup: [Claude Code and Codex](../../../docs/agent-compatibility.md).
+
 # App brief
 
 Write `docs/BRIEF.md` in a folder named after the app
@@ -24,8 +26,7 @@ If the user gives you a spec from BAMA's `specs/` folder (a file or a
 link), it already holds the brief and the stories. Copy its **Brief** block
 to `docs/BRIEF.md` and its **Stories** block to `docs/STORIES.md`. Keep the
 rest of the spec as `docs/SPEC.md`, so later skills read its **How it
-works** and **Gotchas**. Ask only what the user wants to change, then call
-the Skill tool with `new-mac-app`.
+works** and **Gotchas**. Ask only what the user wants to change, then load the `new-mac-app` skill.
 
 ## 2. Interview
 
@@ -93,7 +94,7 @@ Local data. Works offline. No accounts.
 
 ## 5. Hand off
 
-Call the Skill tool with `user-stories`, or with `new-mac-app` if the user
+Load the `user-stories` skill, or `new-mac-app` if the user
 wants to see a window first.
 
 Done when `docs/BRIEF.md` exists, fits on one page, and has every section.

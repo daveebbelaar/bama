@@ -4,6 +4,8 @@ description: Liquid Glass macOS app icon made as an Icon Composer file (Icon/App
 allowed-tools: Bash(tools/make_icon.sh) Bash(tools/icon_review.sh) Bash(./build.sh *) Read Edit Write
 ---
 
+Agent setup: [Claude Code and Codex](../../../docs/agent-compatibility.md).
+
 # App icon
 
 The icon is an Icon Composer file in git: `Icon/AppIcon.icon`, a folder

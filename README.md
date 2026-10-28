@@ -122,6 +122,14 @@ codex plugin marketplace add daveebbelaar/bama
 codex plugin add bama@bama
 ```
 
+For a local checkout, use `codex plugin marketplace add /absolute/path/to/bama`
+instead of the GitHub source above.
+
+After installation, restart Codex and select BAMA in the skills picker or
+invoke `$bama:bama`. Direct skills include `$bama:clone` and `$bama:agent-cli`.
+All 21 skills use the same source as Claude Code. Client differences and MCP
+registration are covered in [Claude Code and Codex](docs/agent-compatibility.md).
+
 </details>
 
 <details>
@@ -141,7 +149,9 @@ npx skills@latest add daveebbelaar/bama --skill=clone
 
 ```bash
 git clone https://github.com/daveebbelaar/bama.git
-bama/scripts/link-skills.sh       # links every skill into ~/.claude/skills and ~/.agents/skills
+bama/scripts/link-skills.sh --agent codex --dry-run
+bama/scripts/link-skills.sh --agent codex
+# Use --agent claude for Claude Code, or --agent all for both.
 ```
 
 </details>
@@ -151,7 +161,14 @@ bama/scripts/link-skills.sh       # links every skill into ~/.claude/skills and 
 - macOS 26 or later
 - Xcode 26 or later, for the Swift 6.2 toolchain (you never open it)
 - An agent that supports skills: Claude Code, Codex, Cursor, Gemini CLI
-- For `clone` on native apps: computer use (Claude Pro or Max)
+- For `clone` on native apps: computer-use tools and the permissions required
+  by the selected client. Claude computer use needs Pro or Max. Codex desktop
+  can use its available computer-use and browser tools.
+
+BAMA itself has no bundled MCP server. Its `agent-cli` skill adds a CLI and
+optional MCP server to apps you build, with registration instructions for
+Claude Code, Claude Desktop, and Codex. Installing BAMA does not start an app
+MCP server.
 
 ## Credits
 

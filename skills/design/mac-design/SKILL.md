@@ -3,7 +3,12 @@ name: mac-design
 description: Design rules that make a SwiftUI app look and feel like a native Mac app on macOS 26 and later, from Apple's eight design principles to Liquid Glass, layout, toolbars, menus, search, keyboard, type, color, and dark mode. Use when building or reviewing any window, sidebar, toolbar, menu, panel, or settings screen, or when the user asks for a more native, Apple-like, or better designed app.
 ---
 
+Agent setup: [Claude Code and Codex](../../../docs/agent-compatibility.md).
+
 # Mac design
+
+Set `BAMA_SKILL_DIR` to the absolute folder containing this `SKILL.md`
+before running its scripts. See the agent setup link above.
 
 Apple already designed your app. Pick the right system parts, arrange them,
 and stay out of their way. Use the system first. Add custom design only
@@ -16,16 +21,14 @@ where the system has nothing.
 - Toolbars: which item goes where, per column: [toolbars.md](toolbars.md).
 - The menu bar, context menus, and the Dock menu: [menus.md](menus.md).
 - Apple's current text on one topic, when a rule here is not enough:
-  `"${CLAUDE_SKILL_DIR}/scripts/hig.sh" <topic>` (for example `toolbars`,
+  `"${BAMA_SKILL_DIR}/scripts/hig.sh" <topic>` (for example `toolbars`,
   `sheets`). It prints the HIG page as plain text.
-- App-wide tokens (colors, radii, motion): call the Skill tool with
-  `design-system`.
+- App-wide tokens (colors, radii, motion): load the `design-system` skill.
 - How a feature works and what it says (names, flow, modals, errors,
-  accessibility): call the Skill tool with `ux-design`.
-- Spacing, alignment, and the checks that catch misalignment: call the
-  Skill tool with `layout-grid`.
-- Parts of your own instead of Apple's: call the Skill tool with
-  `design-kit`, or `design-from-app` to match an app the user names.
+  accessibility): load the `ux-design` skill.
+- Spacing, alignment, and the checks that catch misalignment: load the
+  `layout-grid` skill.
+- Parts of your own instead of Apple's: load the `design-kit` skill, or `design-from-app` to match an app the user names.
 
 ## Apple's eight principles
 

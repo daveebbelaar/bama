@@ -1,0 +1,44 @@
+{
+  "name": "bama",
+  "version": "1.0.0",
+  "description": "Build any Mac app: skills to research, clone, plan, scaffold, design, integrate, optimize, test, and ship native macOS apps with Swift and SwiftUI.",
+  "author": {
+    "name": "Dave Ebbelaar",
+    "url": "https://github.com/daveebbelaar"
+  },
+  "repository": "https://github.com/daveebbelaar/bama",
+  "license": "MIT",
+  "skills": [
+    "./skills/start/bama",
+    "./skills/plan/research",
+    "./skills/plan/clone",
+    "./skills/start/app-brief",
+    "./skills/plan/user-stories",
+    "./skills/start/new-mac-app",
+    "./skills/code/swift-swiftui",
+    "./skills/code/os-integrations",
+    "./skills/code/performance",
+    "./skills/code/improve-architecture",
+    "./skills/code/agent-cli",
+    "./skills/design/ux-design",
+    "./skills/design/mac-design",
+    "./skills/design/design-system",
+    "./skills/design/layout-grid",
+    "./skills/design/design-kit",
+    "./skills/design/design-from-app",
+    "./skills/design/app-icon",
+    "./skills/ship/build-and-verify",
+    "./skills/ship/test-mac-app",
+    "./skills/ship/improve-loop"
+  ],
+  "interface": {
+    "displayName": "BAMA",
+    "shortDescription": "Build native Mac apps with Swift and SwiftUI",
+    "longDescription": "Build any Mac app: skills to research, clone, plan, scaffold, design, integrate, optimize, test, and ship native macOS apps with Swift and SwiftUI.",
+    "developerName": "Dave Ebbelaar",
+    "category": "Developer Tools",
+    "defaultPrompt": [
+      "Use BAMA to plan and build a native Mac app."
+    ]
+  }
+}
