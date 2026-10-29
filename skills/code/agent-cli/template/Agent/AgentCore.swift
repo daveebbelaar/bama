@@ -111,3 +111,17 @@ nonisolated enum JSON {
         date.formatted(.iso8601)
     }
 }
+
+nonisolated enum AgentBinary {
+    /// The app's binary, with the ~/.local/bin link followed. Run from PATH,
+    /// argv[0] is only the CLI's name, so ask the system for the full path.
+    static var url: URL {
+        var size: UInt32 = 0
+        _NSGetExecutablePath(nil, &size)
+        var buffer = [CChar](repeating: 0, count: Int(size))
+        let path = _NSGetExecutablePath(&buffer, &size) == 0
+            ? String(decoding: buffer.prefix { $0 != 0 }.map(UInt8.init(bitPattern:)), as: UTF8.self)
+            : CommandLine.arguments[0]
+        return URL(fileURLWithPath: path).resolvingSymlinksInPath()
+    }
+}

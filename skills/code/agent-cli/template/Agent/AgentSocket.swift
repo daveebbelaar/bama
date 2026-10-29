@@ -98,7 +98,7 @@ nonisolated enum AgentSocket {
     /// Opens the app in the background, with this process's environment, so a
     /// test run (APP_STORE) starts a test copy, never the real one.
     private static func startApp() throws {
-        let executable = URL(fileURLWithPath: CommandLine.arguments[0]).resolvingSymlinksInPath()
+        let executable = AgentBinary.url
         let bundle = executable.deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
         let process = Process()
         if bundle.pathExtension == "app" {
