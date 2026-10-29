@@ -34,8 +34,9 @@ Global shortcut (default Option-Space), menu bar item, Spotlight file search.
 Alfred, Spotlight
 
 ## Look
-Native. A Liquid Glass capsule for the search field, a glass card for results below it,
-the system accent color on the selected row. Results never animate.
+Native, like Spotlight. One Liquid Glass panel: the search bar on top, a hairline, then the
+results. The selected row is a plain gray wash, not the accent color. No scroll bars.
+Results never animate.
 
 ## Not in version one
 - Calculator and System Settings panes
@@ -54,6 +55,7 @@ the system accent color on the selected row. Results never animate.
 | Icons | `NSWorkspace.shared.icon(forFile:)` in an `NSCache` | None |
 | Open, reveal | `NSWorkspace` `openApplication(at:)`, `open(_:)`, `open(_:withApplicationAt:)`, `activateFileViewerSelecting` | None |
 | Menu bar item | `MenuBarExtra` | None |
+| Hidden scroll bars | `.scrollIndicators(.never)` plus an `NSScroller` subclass with no width | None |
 
 Launch needs no permission. The one failure state is a shortcut that another
 app already owns. Recipes: [Global hotkey](../skills/code/os-integrations/recipes.md#global-hotkey-carbon),
@@ -101,7 +103,10 @@ Ranking and limits:
 - Hints: with no space typed, each keyword that starts with the query shows a hint row. An exact keyword goes on top. Return or Tab on a hint fills in "keyword ".
 - Keys: Up, Down, Return opens, Command-Return shows in Finder, Command-1 to 9 opens that row, Tab completes, Esc closes. A click outside closes.
 - Usage: on open, `usage[path] += 1` and `learned[foldedQuery] = path`, in `UserDefaults`.
-- Panel: glass 700 pt wide, search bar 58 pt, rows 50 pt, up to 8 rows then scroll. The top sits 18% below the top of the screen with the mouse. The window is fixed and transparent, with 60 pt around the glass for the shadow.
+- Panel: one glass rectangle 700 pt wide with 26 pt corners. Search bar 58 pt, then a 0.5 pt hairline inset 16 pt from each side (only when there are results), then rows of 50 pt, up to 8 rows then scroll. The top sits 18% below the top of the screen with the mouse. The window is fixed and transparent, with 60 pt around the glass for the shadow.
+- Selected row: a gray wash (black at 8% in light mode, white at 12% in dark mode), 18 pt corners, so it is concentric with the panel (26 pt minus the 8 pt inset). Text stays primary, the subtitle secondary. The keyword chip uses the same wash.
+- Icons: apps and files show their real Finder icons. Symbol tiles (the web row) are one color, not the accent.
+- No scroll bars anywhere: the panel, Settings, and the menu. Trackpad, mouse wheel, and arrow keys still scroll.
 
 ## Stories
 
@@ -114,7 +119,7 @@ Ranking and limits:
 As the user, I press Option-Space in any app and the search panel appears.
 Screens: launcher-empty
 Acceptance:
-- [snap] A glass capsule with "Search apps and files" sits 18% below the top of the screen.
+- [snap] One glass panel with "Search apps and files" sits 18% below the top of the screen, with no hairline while it is empty.
 - [manual] The other app stays frontmost; the field has focus and I can type at once.
 - [manual] Esc, a click outside, or Option-Space again closes it.
 Status: todo
@@ -127,6 +132,7 @@ Acceptance:
 - [unit] FuzzyMatch scores exact > prefix > initials > word prefix > substring > letters in order.
 - [unit] initials("Visual Studio Code") is "vsc"; "cafe" matches "Café".
 - [snap] Rows show icon, name, path, and Command-1 to 9 key caps; the last row is "Search Google".
+- [snap] The results sit in the same glass as the bar, under a hairline; the selected row is a gray wash, and no scroll bar shows.
 Status: todo
 
 ### S-003 Open, reveal, or search the web
@@ -226,6 +232,8 @@ Status: todo
 - A typed `"` or `*` broke the MDQuery string. Escape `\` and `"`, strip `*`. Folders excluded in Spotlight never show up, so say that in the folder setting's footer.
 - `NSWorkspace.icon(forFile:)` returns a large multi-size image that is slow to draw in a list. Draw each once at 64 px with `cgImage(forProposedRect:)` off the main thread, show it at 32 pt, and keep it in an `NSCache` (thread-safe; mark the static `nonisolated(unsafe)` in Swift 6).
 - Carbon swallows a registered combo, so a recorder never sees it. Call `suspend()` on all shortcuts while recording and `resume()` after.
+- An accent fill on the selected row fought the colors of the app icons, and a separate capsule and card did not read as one search box. One glass panel with a gray wash looks like Spotlight and keeps the user's content in color.
+- `Form`, `List`, and sidebar scroll views ignore `.scrollIndicators(.never)`. To hide their bars too, walk the window's views and set each `NSScrollView` scroller to an `NSScroller` subclass whose `scrollerWidth(for:scrollerStyle:)` returns 0, whose draw methods do nothing, and whose `hitTest` returns nil. Run it from `viewDidMoveToWindow` and again on update, one run loop turn later.
 - Resizing the window for each result count made it jump. Keep one fixed transparent window sized for 8 rows, set `sizingOptions = []` on the hosting view, and let the glass grow inside.
 
 Done when Option-Space opens the panel over any app, "vsc" or "saf" puts the right app first and Return opens it, a file in the home folder shows up and opens, "yt cats" opens YouTube, and usage survives a restart.
