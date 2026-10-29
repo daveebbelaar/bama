@@ -16,7 +16,14 @@ dest="$parent/$name"
 [[ ! -e "$dest/Package.swift" ]] || { echo "$dest already has a Package.swift"; exit 1; }
 
 mkdir -p "$dest"
-cp -R -n "$template/" "$dest/"
+# Keep files that are already there. Not `cp -n`: on macOS it exits 1 when it
+# skips a file, and set -e then stops the script halfway.
+rsync -a --ignore-existing "$template/" "$dest/"
+# A kept .gitignore gets the template lines it lacks.
+if ! cmp -s "$template/.gitignore" "$dest/.gitignore"; then
+  [[ -z $(tail -c1 "$dest/.gitignore") ]] || echo >> "$dest/.gitignore"
+  grep -vxF -f "$dest/.gitignore" "$template/.gitignore" >> "$dest/.gitignore" || true
+fi
 mv "$dest/Sources/__APP_NAME__" "$dest/Sources/$name"
 mv "$dest/Sources/__APP_NAME__Kit" "$dest/Sources/${name}Kit"
 mv "$dest/Tests/__APP_NAME__KitTests" "$dest/Tests/${name}KitTests"
