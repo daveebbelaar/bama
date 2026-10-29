@@ -1,6 +1,6 @@
 # Screenshots
 
-Capture the full screen, an area, or one window with a shortcut, then copy, save, drag
+Capture the full screen, an area, or one window with a shortcut, then copy, save, pin, drag
 out, or mark it up with arrows, boxes, text, and blur. Replaces: CleanShot X. Taken from Onyx.
 
 ## Brief
@@ -15,16 +15,16 @@ CleanShot X, Command-Shift-4 plus Preview for markup
 
 ## Main jobs
 1. Capture the screen, an area, or a window with a shortcut.
-2. Copy, save, or drag the capture from a card in the corner.
+2. Copy, save, pin, or drag the capture from a card in the corner, and swipe away the rest.
 3. Mark up a capture with arrows, boxes, text, and blur, then copy or save it.
 
 ## Data
 - Capture: image (full Retina pixels), saved file URL (optional)
 - Annotation: tool, start and end (image pixels), color, size, text, blur style and strength
-- Settings: shortcuts, copy, save, card, sound, save folder
+- Settings: shortcuts, copy, save, card, card close time, sound, save folder
 
 ## Shape
-Menu bar extra plus overlays (picker, corner card) and one editor window.
+Menu bar extra plus overlays (picker, corner cards, pinned captures) and one editor window.
 macOS 26 or later. Local data. Works offline. No accounts.
 
 ## System hooks
@@ -34,7 +34,8 @@ Global shortcuts, menu bar item, Screen Recording permission.
 CleanShot X
 
 ## Look
-Native, system accent color. Liquid Glass corner card with dark, readable buttons.
+Native, system accent color. Corner cards like CleanShot X's Quick Access Overlay: the
+picture edge to edge, and on hover a dark wash with light, readable buttons.
 
 ## Not in version one
 - Scrolling capture, timed capture, cloud upload
@@ -50,13 +51,16 @@ Native, system accent color. Liquid Glass corner card with dark, readable button
 | Capture a display | `SCShareableContent` + `SCScreenshotManager.captureImage` | Screen Recording |
 | Capture a window | `SCContentFilter(desktopIndependentWindow:)` | Screen Recording |
 | Window under the pointer | `CGWindowListCopyWindowInfo`, layer 0, on screen | None |
-| Picker and corner card | Borderless `NSPanel`, `.nonactivatingPanel` | None |
+| Picker, corner cards, pins | Borderless `NSPanel`, `.nonactivatingPanel` | None |
+| Swipe a card away | `NSPanel.sendEvent` override, `.scrollWheel` phases | None |
+| Share a capture | SwiftUI `ShareLink` with the file URL | None |
 | Blur and pixelate | Core Image `CIFilter.pixellate()`, `gaussianBlur()` | None |
 
 Generic code for shortcuts, panels, and capture: [os-integrations recipes](../skills/code/os-integrations/recipes.md).
 
-Types: `CaptureService`, `SelectionOverlay` (one panel per display), `CaptureThumbnail`,
-`AnnotationDocument` (shapes, undo, render), `AnnotationRenderer` (one shape into a y-down
+Types: `CaptureService`, `SelectionOverlay` (one panel per display), `CaptureThumbnail` (one
+card's face and buttons), `CornerCards` (one panel with the column of cards), `CardSwipe` and
+`CardSize` (pure swipe and size math, unit tested), `PinnedImage`, `AnnotationDocument` (shapes, undo, render), `AnnotationRenderer` (one shape into a y-down
 `CGContext`, for canvas and export), `AnnotationBlur` (cached filtered pixels), `AnnotationEditor`
 (window, key monitor), `Permissions`, `HotkeyCenter`, `ShortcutField`, `SettingsView`.
 
@@ -73,8 +77,23 @@ Behavior that matters:
   `scale = frozen.width / bounds.width`, and flip y with `bounds.height - rect.maxY`.
 - After a capture: copy (on), save (off), card (on), sound (on). Folder: Desktop. File name:
   `Shot yyyy-MM-dd 'at' HH.mm.ss.png`.
-- Card: 252 points wide, 16:9 picture, 6 point inset, 18 points from the bottom-left. Hides after
-  8 s unless hovered. Hover: Copy, Save, Annotate, Close. Drag out the saved file or a temp PNG.
+- Card size: the picture's shape, so nothing is cropped. 220 points wide for a landscape picture,
+  at most 200 tall, at least 132 x 104. The picture fills the card, 12 point corners.
+- Column: one panel in the bottom-left, cards 18 points from the screen edges and 10 apart, 22
+  points of margin for shadows. The newest card goes on top. With two or more, the newest has a
+  2 point accent ring. When the column would pass the screen height, the oldest card goes.
+- Hover: a 50% black wash, Copy and Save chips in the middle, and round buttons in the corners:
+  close (top left), pin (top right), annotate (bottom left), share (bottom right). Copy, Save,
+  Annotate, and Pin close the card. Drag out the saved file or a temp PNG.
+- Right-click: Annotate, Pin to the Screen, Copy, Save, Show in Finder (when saved), Close, Close All.
+- Close: after 10 s unless hovered. Settings offers 5 s, 10 s, 30 s, 1 min, and Never.
+- Motion: a card slides in from the left edge (spring, response 0.42, damping 0.86). The column
+  closes a gap with a spring of response 0.36, damping 0.9.
+- Swipe: two fingers toward the edge move the card. It closes past 40% of its width, or on a
+  flick of 500 points per second after at least 12 points. A shorter swipe springs back. Toward
+  the middle it stretches at most 24 points, slower the farther it goes. Up or down does nothing.
+- Pin: a floating panel with the capture at its point size, at most half the screen, centered.
+  Drag it anywhere. Hover shows an Unpin button. Right-click: Copy, Annotate, Unpin.
 - Editor: fits the image in 85% of the screen, min 1000 x 320 points. Shapes use image pixels, top-left
   origin. Sizes in points times the capture scale: arrow 3, 5, 8; box 2, 3.5, 6; text 14, 20, 30.
 - Palette: red `#FF3B30` (default), orange, yellow, green, blue, violet, white, black.
@@ -123,11 +142,12 @@ Acceptance:
 Status: todo
 
 ### S-005 Use the corner card
-As the user, I copy, save, or drag out a capture from the card in the corner.
+As the user, I copy, save, share, or drag out a capture from the card in the corner.
 Screens: card, card-hover
 Acceptance:
-- [snap] Hover shows Copy and Save; white text stays readable over a white screenshot.
-- [manual] Dragging into Finder drops a PNG; the card hides after 8 s unless hovered.
+- [snap] Hover shows Copy and Save in the middle and close, pin, annotate, share in the corners; the chips stay readable over a white screenshot.
+- [unit] `CardSize.fitting` keeps the picture's shape, 132 to 220 points wide and 104 to 200 tall.
+- [manual] Dragging into Finder drops a PNG; the card slides out after 10 s unless hovered.
 Status: todo
 
 ### S-006 Change shortcuts
@@ -139,10 +159,11 @@ Acceptance:
 Status: todo
 
 ### S-007 Choose what happens after a capture
-As the user, I turn copy, save, card, and sound on or off and pick a save folder.
+As the user, I turn copy, save, card, and sound on or off, pick when the card closes, and pick a save folder.
 Screens: settings-capture
 Acceptance:
-- [unit] Defaults: copy on, save off, card on, sound on, folder Desktop.
+- [unit] Defaults: copy on, save off, card on, card closes after 10 s, sound on, folder Desktop.
+- [snap] The close picker offers 5 s, 10 s, 30 s, 1 min, and Never, and is off while the card is off.
 - [self] With save on, the file is `Shot yyyy-MM-dd at HH.mm.ss.png` in the folder.
 Status: todo
 
@@ -153,9 +174,27 @@ Acceptance:
 - [snap] The menu lists the three captures with their shortcuts, then Settings and Quit.
 Status: todo
 
+### S-009 Stack and swipe away cards
+As the user, I take several captures in a row and flick the ones I do not need off the screen.
+Screens: card-stack
+Depends: S-005
+Acceptance:
+- [snap] The newest card is on top with an accent ring; the older cards stay where they were.
+- [unit] `CardSwipe` closes past 40% of the width or on a 500 pt/s flick after 12 pt, springs back otherwise, and ignores an up or down swipe.
+- [manual] A two-finger swipe toward the edge flicks the card away at the swipe's speed, and the cards above slide down. Right-click, Close All clears the column.
+Status: todo
+
+### S-010 Pin a capture to the screen
+As the user, I click pin on a card and the capture floats above every window.
+Depends: S-005
+Acceptance:
+- [manual] The pin shows at its real size (at most half the screen), drags anywhere, and stays when I switch apps.
+- [manual] Hover shows Unpin; right-click offers Copy, Annotate, and Unpin.
+Status: todo
+
 ## M2 Mark up
 
-### S-009 Open a capture in the editor
+### S-011 Open a capture in the editor
 As the user, I click Annotate on the card and the editor opens with my capture.
 Screens: editor-empty
 Depends: S-005
@@ -164,7 +203,7 @@ Acceptance:
 - [self] Command-S saves a PNG at the capture's pixel size with the annotations on it.
 Status: todo
 
-### S-010 Draw arrows and boxes
+### S-012 Draw arrows and boxes
 As the user, I drag with Arrow or Rectangle to draw in the current color and size.
 Screens: editor-shapes
 Acceptance:
@@ -173,14 +212,14 @@ Acceptance:
 - [manual] Select drags a shape, Delete removes it, and Undo restores both (200 steps).
 Status: todo
 
-### S-011 Add text
+### S-013 Add text
 As the user, I click with Text, type, and press Return or click away.
 Acceptance:
 - [manual] Letter keys go to the text box while typing, not to the tool shortcuts.
 - [unit] An empty text box is removed; one edit is one undo step.
 Status: todo
 
-### S-012 Blur private parts
+### S-014 Blur private parts
 As the user, I drag with Blur over anything private and set its style and strength.
 Screens: editor-blur
 Acceptance:
@@ -211,10 +250,28 @@ Status: todo
 - Copying a 5K PNG blocks. Encode on a background queue; give TIFF lazily with `NSPasteboardItemDataProvider`.
 - Play the shutter with `AudioServicesPlaySystemSound` and the system "Screen Capture.aif".
   `NSSound` blocked the main thread for minutes while CoreAudio was busy.
-- The card is never key, so standard buttons draw dimmed. Use custom styles with a dark fill and
-  white text; hover makes fills darker, never lighter, or they vanish over a bright picture.
+- The card is never key, so standard buttons draw dimmed. Use custom chip styles with fixed
+  colors: white at 84% with black ink at 82%, on a 50% black wash; full white on hover. They sit
+  on a picture, so they look the same in light and dark mode.
+- Put every card in one panel. A panel per card let the windows cover each other's buttons.
+  Bottom-align the column, grow the panel before a new card goes in, and shrink it only after
+  the restack animation ends, so the cards already there never move.
+- Put the panel's left edge just past the screen edge (`edgeInset - margin`). A card that slides
+  out is cut off there and never shows on the next display.
+- Insert a new card at its hidden offset, then animate it to 0 one frame (16 ms) later. Otherwise
+  its first layout animates from the wrong place.
+- A non-key panel gives SwiftUI no clean swipe. Catch `.scrollWheel` in the panel's `sendEvent`
+  first. Use only events with `hasPreciseScrollingDeltas` (a trackpad), skip the momentum phase,
+  follow `isDirectionInvertedFromDevice`, and lock the axis on the first clear movement.
+- Start the fling at the swipe's speed: `.interpolatingSpring(duration: 0.38, bounce: 0.12,
+  initialVelocity: velocity / distance)`. Otherwise the card jumps when the fingers lift.
+- Resample the picture once to the card's size in pixels, with high quality. It stays sharp on
+  Retina and is cheap to draw.
+- `ShareLink` needs a file. Write the temp PNG on the first hover of the share button, not for
+  every card.
 - Blur: `clampedToExtent()` before the filter, flip the rect (Core Image is bottom-up), and draw
   pixelated regions with `interpolationQuality = .none`. Shadows ignore the CTM: scale them by hand.
 
 Done when all three shortcuts capture at full Retina size on every display, the card copies,
-saves, and drags out, and the editor saves a PNG with arrows, boxes, text, and blur.
+saves, pins, and drags out, cards stack and swipe away, and the editor saves a PNG with arrows,
+boxes, text, and blur.
