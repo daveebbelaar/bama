@@ -21,7 +21,7 @@ enum AgentCLI {
                 return help(Array(words.dropFirst()), json: json)
             case "--version", "version":
                 // Through the ~/.local/bin link, Bundle.main cannot find Info.plist. Follow the link.
-                let executable = URL(fileURLWithPath: CommandLine.arguments[0]).resolvingSymlinksInPath()
+                let executable = AgentBinary.url
                 let plist = executable.deletingLastPathComponent().deletingLastPathComponent().appending(path: "Info.plist")
                 let version = NSDictionary(contentsOf: plist)?["CFBundleShortVersionString"] as? String ?? "dev"
                 print(json ? JSON.string(["version": version]) : "__CLI_NAME__ \(version)")
