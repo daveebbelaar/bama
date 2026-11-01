@@ -27,10 +27,28 @@ fi
 mv "$dest/Sources/__APP_NAME__" "$dest/Sources/$name"
 mv "$dest/Sources/__APP_NAME__Kit" "$dest/Sources/${name}Kit"
 mv "$dest/Tests/__APP_NAME__KitTests" "$dest/Tests/${name}KitTests"
-# Replace the placeholders in every text file.
-grep -rlI "__APP_NAME__\|__BUNDLE_ID__" "$dest" | while read -r f; do
+# Use separate literal patterns: basic-regex alternation differs across grep builds.
+# Capture the result before the loop so a failed search cannot silently skip it.
+if ! files=$(grep -rlIF --exclude-dir=.git -e "__APP_NAME__" -e "__BUNDLE_ID__" "$dest"); then
+  echo "Could not find template placeholders in $dest; scaffold is incomplete" >&2
+  exit 1
+fi
+while IFS= read -r f; do
   sed -i '' -e "s/__APP_NAME__/$name/g" -e "s/__BUNDLE_ID__/$bundle/g" "$f"
-done
+done <<< "$files"
+# Verify before committing or reporting success. grep exits 1 for no matches;
+# an error (2 or higher) must also stop scaffolding.
+if remaining=$(grep -rlIF --exclude-dir=.git -e "__APP_NAME__" -e "__BUNDLE_ID__" "$dest"); then
+  echo "Template placeholders remain; scaffold is incomplete:" >&2
+  echo "$remaining" >&2
+  exit 1
+else
+  grep_result=$?
+  if (( grep_result != 1 )); then
+    echo "Could not verify template substitution in $dest" >&2
+    exit 1
+  fi
+fi
 chmod +x "$dest/build.sh" "$dest/tools/make_icon.sh" "$dest/tools/icon_review.sh" "$dest/tools/grid-lint.sh" "$dest/tools/check-layout.swift" "$dest/tools/snap.sh" "$dest/tools/selftest.sh"
 
 cd "$dest"

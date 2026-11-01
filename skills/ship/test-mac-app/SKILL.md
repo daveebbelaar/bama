@@ -82,23 +82,65 @@ for a test target with no host app.
 
 ### Key events and menu audit
 
-The self-test can press real keys without computer use:
+The self-test can send synthetic key events through the app.
+`NSApp.sendEvent` delivers a key event to `NSApp.keyWindow`, not to the
+window in `windowNumber`. If no window is key, the event is lost and the
+check fails for the wrong reason. While another app is in front, the
+window becomes key only after the app activates, a short time later. So
+make the window key, focus the view under test, and wait in the
+self-test's `Task` until both are true. A loop on `RunLoop.main` does not
+work here, because activation needs the main queue.
 
 ```swift
+window.makeKeyAndOrderFront(nil)
+window.makeFirstResponder(list)  // a toolbar search field can take focus first
+for _ in 0..<40 where NSApp.keyWindow !== window {
+    try? await Task.sleep(for: .milliseconds(50))
+}
+check("list has keyboard focus", NSApp.keyWindow === window && window.firstResponder === list)
 let event = NSEvent.keyEvent(with: .keyDown, location: .zero, modifierFlags: [],
     timestamp: 0, windowNumber: window.windowNumber, context: nil,
     characters: "\r", charactersIgnoringModifiers: "\r", isARepeat: false, keyCode: 36)!
-window.sendEvent(event)                               // Return in the focused list
+NSApp.sendEvent(event)                                // Return through app event routing
 NSApp.mainMenu?.performKeyEquivalent(with: commandK)  // a menu shortcut
 ```
+
+Send events with the flags a real keyboard sends. Arrow keys carry
+`.numericPad` and `.function`; using `modifierFlags: []` can make a test
+pass while real input fails. For example, send an unmodified Right Arrow:
+
+```swift
+let rightArrow = NSEvent.keyEvent(with: .keyDown, location: .zero,
+    modifierFlags: [.numericPad, .function], timestamp: 0,
+    windowNumber: window.windowNumber, context: nil,
+    characters: "\u{F703}", charactersIgnoringModifiers: "\u{F703}",
+    isARepeat: false, keyCode: 124)!
+NSApp.sendEvent(rightArrow)
+```
+
+When app code checks for an arrow with no shortcut modifiers held, remove
+key classification flags and ignore Caps Lock:
+
+```swift
+let held = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
+    .subtracting([.numericPad, .function, .capsLock])
+if event.keyCode == 124, held.isEmpty { browseInto() }
+```
+
+Check plain arrows and arrows with Shift, Control, Option, or Command so
+navigation does not consume a modified shortcut by mistake.
+
+Test typing by sending key events through `NSApp.sendEvent` and checking
+what the field received. Setting the model's text is useful for setup,
+but does not test focus or input routing. Start from the focus state the
+user encounters, including any selected placeholder text, type a name or
+filter, and assert the resulting field text and model value. Keep a real
+keyboard check for input methods and system shortcuts that synthetic
+events do not exercise.
 
 Walk `NSApp.mainMenu` and check every command's title, key equivalent,
 modifiers, and symbol against the command map. One loop turns "every
 action has a menu item and a shortcut" into a check per item.
-
-Focus the list after making the window key (`window.makeKey()`, then
-`makeFirstResponder(list)`). A search field in the toolbar can take focus
-first, and then list keys and menu items miss the list.
 
 ### Menu check (from outside)
 

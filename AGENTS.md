@@ -18,6 +18,9 @@ keep them identical.
 - `specs/<app>.md`: build plans for small apps, taken from Onyx. Each has
   Brief, How it works, Stories, Gotchas, and a "Done when" line, in that
   order. `specs/README.md` lists them.
+- `scripts/`: repo tools. `link-skills.sh` links the skills for local use.
+  `test-new-app.py` tests the new-app scaffold script. Run it after you change
+  `new-app.sh`.
 
 ## Writing skills
 
