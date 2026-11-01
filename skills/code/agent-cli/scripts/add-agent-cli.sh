@@ -12,9 +12,12 @@ cli=${2:?usage: add-agent-cli.sh <app-folder> <cli-name>}
 [[ "$cli" =~ ^[a-z][a-z0-9-]*$ ]] || { echo "cli-name must be lowercase letters, digits, and dashes, like tasks or mail"; exit 1; }
 here=${0:A:h}
 template=${here:h}/template
-name=$(basename "$(find "$app_dir/Sources" -mindepth 1 -maxdepth 1 -type d | head -1)")
-src="$app_dir/Sources/$name"
-[[ -f "$src/App.swift" ]] || { echo "no $src/App.swift: is this an app from the bama template?"; exit 1; }
+# The template also creates Sources/<App>Kit. Directory enumeration order is
+# not stable, so identify the app by its App.swift rather than the first folder.
+app_source=$(find "$app_dir/Sources" -mindepth 2 -maxdepth 2 -type f -name App.swift | head -1)
+[[ -n "$app_source" ]] || { echo "no Sources/<App>/App.swift: is this an app from the bama template?"; exit 1; }
+src=${app_source%/App.swift}
+name=${src:t}
 [[ ! -e "$src/Agent" ]] || { echo "$src/Agent already exists"; exit 1; }
 
 mkdir -p "$src/Agent"
