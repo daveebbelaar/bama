@@ -20,6 +20,8 @@ Swift and SwiftUI. Local data. No Xcode GUI.
 
 **[Quick start](#quick-start) · [How it works](#how-it-works) · [Skills](#skills) · [Specs](#specs) · [Install](#install)**
 
+**On Windows? Use [BAWA: Build Any Windows App](https://github.com/daveebbelaar/bawa) instead.**
+
 </div>
 
 ## Quick start
