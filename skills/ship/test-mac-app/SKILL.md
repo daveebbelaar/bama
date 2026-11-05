@@ -92,6 +92,24 @@ window.sendEvent(event)                               // Return in the focused l
 NSApp.mainMenu?.performKeyEquivalent(with: commandK)  // a menu shortcut
 ```
 
+Send events with the flags a real keyboard sends. Arrow keys always carry
+`.numericPad` and `.function`; an event built with `modifierFlags: []`
+passes a check that the real keyboard fails. In app code, compare only the
+modifiers people hold down:
+
+```swift
+let held = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
+    .subtracting([.numericPad, .function, .capsLock])
+if event.keyCode == 124, held.isEmpty { browseInto() }   // → with nothing held
+```
+
+Test typing by typing: send key events through `NSApp.sendEvent` and check
+what the field received. Never set the model's text instead. Setting the
+text skips focus, and a field that never gets the keyboard still passes.
+Two apps shipped a typing bug this way: letters went to a panel instead of
+its filter field, and a typed name landed inside the selected placeholder
+text.
+
 Walk `NSApp.mainMenu` and check every command's title, key equivalent,
 modifiers, and symbol against the command map. One loop turns "every
 action has a menu item and a shortcut" into a check per item.
