@@ -21,7 +21,12 @@ if [[ -z "$identity" ]]; then
 fi
 [[ -n "$identity" ]] || identity=-
 
-swift build -c $config --package-path "$here" --scratch-path "$scratch" 2>&1 | grep -E "error|warning|Build complete" | grep -v "^\[" || true
+build_log=$(mktemp)
+build_ok=1
+swift build -c "$config" --package-path "$here" --scratch-path "$scratch" > "$build_log" 2>&1 || build_ok=0
+grep -E "error|warning|Build complete" "$build_log" | grep -v "^\[" || true
+rm -f "$build_log"
+[[ "$build_ok" == 1 ]] || { echo "build failed"; exit 1; }
 bin="$scratch/$config/$name"
 [[ -x "$bin" ]] || { echo "build failed"; exit 1; }
 # swift build can report success while an edited file failed to compile. Catch that.

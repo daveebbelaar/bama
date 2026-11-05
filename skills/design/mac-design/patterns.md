@@ -445,7 +445,7 @@ later inside SwiftUI. Test undo in the self-test: do, undo, fetch again.
 
 ## Menu bar extra
 
-Add `MenuBarExtra` next to the main `Window` scene in `App.swift` for an always-available entry point. Let people turn it off in Settings (`isInserted:`), and never make it the only way to reach a feature: the app also has a Dock menu (menus.md). The icon is a template SF Symbol, so it follows the menu bar's light and dark look. Show a menu, as below. Use `.menuBarExtraStyle(.window)` only when the feature is too complex for a menu (a timer with controls, a small player). [HIG The menu bar]
+Add `MenuBarExtra` next to the main `Window` scene in `App.swift` for an always-available entry point. Let people turn it off in Settings with an `isInserted:` binding (if that hangs, see "A menu bar icon people can hide" below), and never make it the only way to reach a feature: the app also has a Dock menu (menus.md). The icon is a template SF Symbol, so it follows the menu bar's light and dark look. Show a menu, as below. Use `.menuBarExtraStyle(.window)` only when the feature is too complex for a menu (a timer with controls, a small player). [HIG The menu bar]
 
 ```swift
 struct MenuBarScenePreview: Scene {
@@ -496,6 +496,45 @@ CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter()
 The app adds an observer with `CFNotificationCenterAddObserver` and
 reloads. Keep a cheap fallback: `PRAGMA data_version` changes whenever
 another connection commits, so checking it once a second catches a missed ping.
+
+### A menu bar icon people can hide
+
+Start with `MenuBarExtra(isInserted:)` bound to `@AppStorage`, as in
+Apple's `MenuBarExtra` example. Change the setting while the app runs and
+check that the icon hides and comes back.
+
+One launcher app hung at launch at 99% CPU with this binding. A sample
+showed `AppGraph.graphDidChange` and `makeMainMenu` in a loop. A guarded
+binding stopped the loop, but then the icon did not hide.
+
+If you see this, use an `NSStatusItem` that follows the setting. Use it in
+place of the `MenuBarExtra` scene, so the app has one icon:
+
+```swift
+final class MenuBarIcon: NSObject {
+    private let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
+
+    override init() {
+        super.init()
+        item.autosaveName = "MyApp"   // macOS keeps the icon's place under this name
+        item.button?.image = NSImage(systemSymbolName: "checklist", accessibilityDescription: "MyApp")
+        item.menu = makeMenu()
+        follow()
+    }
+
+    /// Shows or hides the icon to match the option, now and whenever it changes.
+    private func follow() {
+        withObservationTracking {
+            item.isVisible = OptionsStore.shared.showsMenuBarIcon   // an @Observable store owns the key
+        } onChange: { [weak self] in
+            DispatchQueue.main.async { self?.follow() }
+        }
+    }
+}
+```
+
+In the self-test, check `item.isVisible`, not the status bar windows: one
+icon has several windows, and only one is on a screen.
 
 ### Services menu: "Add to MyApp" in every app
 

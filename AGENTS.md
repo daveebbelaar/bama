@@ -43,4 +43,15 @@ Follow Matt Pocock's `writing-for-agents` rules:
 2. Add it to `plugin.json` `skills`, the README table, and the router
    (`skills/start/bama/SKILL.md`).
 3. Run `claude plugin validate . --strict`.
-4. Keep `version` in `plugin.json` at 1.0.0 until the first release. After that, bump it, so installed copies update.
+
+## Releasing
+
+1. Bump `version` in `plugin.json`. Installed copies update only when this
+   string changes. Keep `version` out of `marketplace.json`.
+2. Run `claude plugin validate . --strict`.
+3. Merge to `main`. Use a merge commit for a branch with contributor commits,
+   so their pull requests show as merged.
+4. On `main`, run `claude plugin tag . --push`. It creates `bama--v<version>`.
+5. Run `gh release create bama--v<version> --generate-notes`.
+
+Done when `claude plugin update bama@bama` installs the new version.

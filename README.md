@@ -114,6 +114,15 @@ Pick one route per agent. Two routes install every skill twice.
 /plugin install bama@bama
 ```
 
+To get new versions, run this in your shell, then start a new session:
+
+```bash
+claude plugin marketplace update bama
+claude plugin update bama@bama
+```
+
+To update on its own: run `/plugin`, open **Marketplaces**, select `bama`, and select **Enable auto-update**.
+
 </details>
 
 <details>
