@@ -1,12 +1,14 @@
 # App shell
 
 The frame of a window with a left sidebar, a right panel, and a top bar on
-macOS 26. Field test: LocalChat on macOS 26.5, one chat app rebuilt through
-each layout below while its owner reviewed screenshots. Use
+macOS 26 and later. Field test: LocalChat on macOS 26.5, one chat app rebuilt
+through each layout below while its owner reviewed screenshots, then the same
+app on macOS 27.2. Unless a value names macOS 27.2, it comes from macOS 26.5. Use
 [toolbars.md](toolbars.md) for which item goes where.
 
 ## Contents
 
+- The system sidebar by OS
 - Pick the right side
 - Floating right panel
 - Line up the content
@@ -18,14 +20,35 @@ each layout below while its owner reviewed screenshots. Use
 - Review
 - Example
 
+## The system sidebar by OS
+
+The OS decides how the sidebar looks, not the SDK. LocalChat, built with the
+macOS 26.5 SDK, shows both columns below, depending on the Mac it runs on.
+
+| | macOS 26.5 | macOS 27.2 |
+|---|---|---|
+| Shape | Floats: rounded, inset from the window's edges | Runs the window's full height, with no inset |
+| Fill | Matches the values under "Floating right panel" | Gray |
+| Edge | A soft shadow over the content | A line along its edge |
+| Selection pill starts | 10 pt from the sidebar's edge | 10 pt from the window |
+| Row text starts | 6 pt inside the pill | 16 pt from the window, which is 6 pt inside the pill |
+| Status row's bottom | 18 pt from the window | 10 pt from the window |
+
+Inside the sidebar the 10 and the 6 did not change. The sidebar's edge moved to
+the window's edge.
+
 ## Pick the right side
 
-The system sidebar floats: rounded, inset from the window's edges, with a soft
-shadow over the content. A SwiftUI `.inspector` does not. On macOS 26.5 it is a
-flat full-height column with a line along its edge, so the two sides look
-different.
+On macOS 27.2 a floating right panel no longer matches the system sidebar. The
+panel floats and the sidebar does not, so the two sides look different. This
+guide has no recommendation for macOS 27.2 yet, because LocalChat has not chosen
+its fix. Look at both sides in a snapshot before you choose.
 
-| | Inspector | Floating panel |
+The rest of this section comes from macOS 26.5, where the system sidebar floats.
+A SwiftUI `.inspector` does not. It is a flat full-height column with a line along
+its edge, so the two sides look different.
+
+| macOS 26.5 | Inspector | Floating panel |
 |---|---|---|
 | Looks like | A flat column with a line | The sidebar on the left |
 | Top bar | Splits at the column line | One bar over the chat and the panel |
@@ -33,15 +56,17 @@ different.
 | Menu command | `InspectorCommands()` | Your own button and shortcut |
 | Color | System | Measured by hand |
 
-Start with the inspector: it is less code, and people can resize it. Use the
-floating panel when the two sides must match, as in a chat app or a window that
-is on camera. Decide before you build the toolbar, because the choice sets how
-the toolbar works.
+On macOS 26.5, start with the inspector: it is less code, and people can resize
+it. Use the floating panel when the two sides must match, as in a chat app or a
+window that is on camera. Decide before you build the toolbar, because the choice
+sets how the toolbar works.
 
 Inspector rules are in [toolbars.md](toolbars.md), "Columns" and "Toggles". The
 main one: put `.inspector` on the `NavigationSplitView`, not on a column.
 
 ## Floating right panel
+
+This panel copies the macOS 26.5 sidebar. Its values match nothing on macOS 27.2.
 
 Make the panel a sibling of the content inside the detail column, so the
 content narrows when it opens.
@@ -78,13 +103,25 @@ the panel came out grayer than the sidebar.
 Views inside and outside a scroll view must share one edge: the text, the chips,
 and the chat box under them.
 
-- Make the scroll bar float. With a mouse attached, a scroll bar takes about 16 pt
-  of width. Centered content inside the scroll view then moves 8 pt left, while
-  the chat box outside it stays. It also jumps when a short chat grows long enough
-  to scroll. Set `scrollerStyle = .overlay` on the enclosing `NSScrollView`, and
-  set it again when the system's preferred style changes. The example has the code.
-- Give the content's lowest control and both status rows one bottom. In LocalChat
-  that is 18 pt from the window: the panel's 8 plus the row's 10.
+- Measure the scroll bar's width and add it back. With a mouse attached, a scroll
+  bar takes about 16 pt of width, and 17 pt on macOS 27.2. Centered content inside
+  the scroll view then moves about 8 pt left, while the chat box outside it stays.
+  It also jumps when a short chat grows long enough to scroll. Do these steps, and
+  the example has the code:
+  1. Read the scroll view's outer width and its content's width, each with
+     `.onGeometryChange`.
+  2. Size the column from the outer width, the same way as the chat box.
+  3. Add the difference as leading padding on the column:
+     `.padding(.leading, max(outerWidth - innerWidth, 0))`.
+
+  When the scroll bar takes no width, the difference is 0 and nothing moves.
+- Leave `scrollerStyle` alone. Setting `.overlay` on the enclosing `NSScrollView`
+  worked on macOS 26.5. On macOS 27.2 the style reads `.overlay` and the scroll bar
+  still takes its 17 pt.
+- Give the content's lowest control and both status rows one bottom. On macOS 26.5
+  in LocalChat that is 18 pt from the window: the panel's 8 plus the row's 10. On
+  macOS 27.2 the sidebar's status row sits 10 pt from the window, so a `=name_`
+  probe with a floating panel's 18 pt fails.
 - Probe these edges across areas, so the check fails when one moves: `layout-grid`
   skill, "Line up across areas".
 - Run the snapshots once with `-AppleShowScrollBars Always`. Without a mouse the
@@ -149,12 +186,13 @@ from one noisy recording, so compare the two sides by eye.
 | You see | Cause | Fix |
 |---|---|---|
 | Toolbar items cross the panel's line | `.inspector` sits on a column, not on the split view | Move it to the `NavigationSplitView` |
-| A line runs beside the right panel | `.inspector` draws it, and covering it with a view does not hold | Use the floating panel |
+| A line runs beside the right panel | `.inspector` draws it, and covering it with a view does not hold | On macOS 26.5, use the floating panel. On macOS 27.2, see "Pick the right side" |
+| The right panel floats and the sidebar does not | The system sidebar on macOS 27.2 | No fix chosen yet: "Pick the right side" |
 | A line runs under the top bar | `.scrollEdgeEffectStyle(.hard, for: .top)` | Use the default style, or hide the effect |
 | The content slides past the window's edge | Column minimums add up to more than the window | Raise the window's minimum width |
 | A custom toolbar item is not there | A toolbar hides a `Button` with a custom label | Use a plain view with `.onTapGesture` and `.accessibilityAction` |
 | The panel toggle shows twice | A second toggle in the main toolbar, while the first stays with the closed inspector | One toggle only |
-| Text sits 8 pt left of the chat box | The scroll bar takes width | Make the scroll bar float |
+| Text sits about 8 pt left of the chat box | The scroll bar takes width, even with `scrollerStyle = .overlay` on macOS 27.2 | Measure it and add it back: "Line up the content" |
 | Content sits 4 pt off center between the panels | The floating panel has a gap on the content's side | Inset only its three outer sides |
 | Section headers start 2 pt left of the rows | The system places them there | Add 2 pt of leading padding to the header's text |
 | The status row sticks out past the selection pill | An 8 pt inset, where the pill uses 10 | Use the sidebar's measured inset |
@@ -162,10 +200,12 @@ from one noisy recording, so compare the two sides by eye.
 
 ## Review
 
-Take a snapshot of each state, in light and in dark, as the key window:
+Take a snapshot of each state, in light and in dark, as the key window, on every
+macOS version the app supports:
 
-- Left and right panels share shape, inset, shadow, and color, in front and
-  behind other windows.
+- On macOS 26.5, left and right panels share shape, inset, shadow, and color, in
+  front and behind other windows. On macOS 27.2 they do not yet: "Pick the right
+  side".
 - The content's left and right edges match the chat box's, with scroll bars
   forced on. Its column is centered between the panels.
 - Both panels open, each one closed, and both closed. Each toggle appears once
@@ -174,18 +214,29 @@ Take a snapshot of each state, in light and in dark, as the key window:
 - The biggest text size, if the app has one.
 - A window with no sidebar, scrolled, with text under the traffic lights.
 - No line under the top bar, and none beside a panel, unless you chose the
-  inspector.
+  inspector. On macOS 27.2 the system sidebar draws its own line.
 
 ## Example
 
-Typechecked against the macOS 26.5 SDK. `Color(light:dark:)` and `Space` come
-from the template's `UI/Theme.swift` and `UI/Grid.swift`.
+Typechecked against the macOS 26.5 SDK, and run on macOS 27.2 with scroll bars
+forced on: the text and the chat box share both edges. `Color(light:dark:)` and
+`Space` come from the template's `UI/Theme.swift` and `UI/Grid.swift`. The
+example's `FloatingPanel` copies the macOS 26.5 sidebar, so it does not match on
+macOS 27.2.
 
 ```swift
 struct ContentView: View {
     @State private var showPanel = true
     @State private var search = ""
+    @State private var outerWidth: CGFloat = 0
+    @State private var innerWidth: CGFloat = 0
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    private let readingWidth: CGFloat = 640
+
+    /// The same width as the chat box under it.
+    private var columnWidth: CGFloat {
+        max(min(readingWidth, outerWidth - Space.margin * 2), 0)
+    }
 
     var body: some View {
         NavigationSplitView {
@@ -201,6 +252,10 @@ struct ContentView: View {
             HStack(spacing: 0) {
                 page
                     .frame(minWidth: 420)
+                    .safeAreaBar(edge: .bottom) {
+                        Text("The chat box")
+                            .frame(width: columnWidth)
+                    }
                 if showPanel {
                     Text("Panel")
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -230,9 +285,13 @@ struct ContentView: View {
     private var page: some View {
         ScrollView {
             Text("The conversation")
+                .frame(width: columnWidth, alignment: .leading)
+                // A scroll bar can take width. This keeps the column on the chat box's edges.
+                .padding(.leading, max(outerWidth - innerWidth, 0))
                 .frame(maxWidth: .infinity)
-                .floatingScrollBar()
+                .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { innerWidth = $0 }
         }
+        .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { outerWidth = $0 }
         .contentMargins(.top, 36, for: .scrollContent)
         .mask {  // text fades out under the window buttons
             VStack(spacing: 0) {
@@ -247,7 +306,7 @@ struct ContentView: View {
     }
 }
 
-/// Matches the system sidebar: inset, rounded, with a soft shadow over the content.
+/// Matches the system sidebar on macOS 26.5: inset, rounded, with a soft shadow over the content.
 struct FloatingPanel: ViewModifier {
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.appearsActive) private var appearsActive
@@ -264,37 +323,6 @@ struct FloatingPanel: ViewModifier {
             .shadow(color: .black.opacity(colorScheme == .dark ? 0.35 : 0.1), radius: 16, x: -2, y: 0)
             .padding([.top, .bottom, .trailing], Space.sm)  // no gap on the content's side
             .ignoresSafeArea(.container, edges: .top)
-    }
-}
-
-extension View {
-    /// A scroll bar that takes no width. Put it on the content inside a ScrollView.
-    func floatingScrollBar() -> some View { background(FloatingScrollBarHook()) }
-}
-
-private struct FloatingScrollBarHook: NSViewRepresentable {
-    func makeNSView(context: Context) -> Probe { Probe() }
-    func updateNSView(_ probe: Probe, context: Context) { probe.apply() }
-
-    final class Probe: NSView {
-        override func viewDidMoveToWindow() {
-            super.viewDidMoveToWindow()
-            NotificationCenter.default.removeObserver(self)
-            guard window != nil else { return }
-            // The system resets the style when the person plugs in a mouse or changes the setting.
-            NotificationCenter.default.addObserver(self, selector: #selector(styleChanged),
-                                                   name: NSScroller.preferredScrollerStyleDidChangeNotification, object: nil)
-            DispatchQueue.main.async { [weak self] in self?.apply() }
-        }
-
-        @objc private func styleChanged(_ note: Notification) {
-            DispatchQueue.main.async { [weak self] in self?.apply() }
-        }
-
-        func apply() {
-            guard let scrollView = enclosingScrollView, scrollView.scrollerStyle != .overlay else { return }
-            scrollView.scrollerStyle = .overlay
-        }
     }
 }
 ```
