@@ -114,7 +114,8 @@ Composer().gridProbe("composer", area: "", edge: "=reading")
 | `=name_` | bottom |
 
 These probes skip rules 2 to 6, so a view off the 4 pt grid can still match a
-system edge. Add a second `.gridProbe` to check one view against two groups.
+system edge. To check one view against two groups, add a second `.gridProbe` with
+a different name, because a probe with the same name replaces the first.
 
 Run the snapshots once with scroll bars on, because a scroll bar that takes width
 moves centered content (`mac-design`, app-shell.md):
