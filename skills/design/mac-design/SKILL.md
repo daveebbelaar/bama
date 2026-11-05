@@ -14,6 +14,8 @@ where the system has nothing.
 - Copyable SwiftUI code: [patterns.md](patterns.md).
 - The Settings window: [settings.md](settings.md).
 - Toolbars: which item goes where, per column: [toolbars.md](toolbars.md).
+- A left sidebar, a right panel, and a top bar that fit together, or no top
+  bar: [app-shell.md](app-shell.md).
 - The menu bar, context menus, and the Dock menu: [menus.md](menus.md).
 - Apple's current text on one topic, when a rule here is not enough:
   `"${CLAUDE_SKILL_DIR}/scripts/hig.sh" <topic>` (for example `toolbars`,
@@ -73,7 +75,9 @@ A to-do app lives in its quick-add panel.
 
 - `NavigationSplitView`: sidebar, content, detail. Global actions in the
   toolbar. No sidebar when navigation is one level.
-- Selection details in `.inspector` or the detail column.
+- Selection details in `.inspector` or the detail column. An inspector looks
+  flat beside the floating sidebar. To make both sides match, call on
+  [app-shell.md](app-shell.md) before you build the toolbar.
 - The UI frames the user's content. Ask what the least UI is that lets it
   stand out.
 - Progressive disclosure: an empty page shows one `ContentUnavailableView`
