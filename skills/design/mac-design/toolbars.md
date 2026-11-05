@@ -51,7 +51,9 @@ sits over the column whose view declares it.
   `ToolbarItem`s start at the column's leading edge. Put
   `ToolbarSpacer(.flexible)` first to push them trailing.
 - `.inspector` goes on the `NavigationSplitView`, not on a column. It then
-  gets a full-height column with its own toolbar area.
+  gets a full-height column with its own toolbar area. That column is flat, with
+  a line along its edge. For a right panel that matches the sidebar, or for no
+  top bar, use [app-shell.md](app-shell.md).
 - No `.toolbar` on the `NavigationSplitView` itself. A `.primaryAction` there
   lands at the leading edge of the detail column.
 - Check: snapshot with the sidebar collapsed and the inspector closed. Every
@@ -134,6 +136,7 @@ The toolbar fails when it has two sidebar or inspector toggles, items over the
 wrong column, items that move when a column collapses, more than three groups,
 an item without `.help`, an action missing from the menu bar, a Settings
 button, tint as decoration, or an `HStack` drawn in place of `.toolbar`.
+Check the left and right panels together: [app-shell.md](app-shell.md), "Review".
 
 ## Example
 

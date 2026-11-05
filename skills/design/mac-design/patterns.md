@@ -141,7 +141,8 @@ struct ItemCommands: Commands {
 ## Toolbar that follows the columns
 
 A window with a sidebar, a list, and an inspector has three toolbar areas,
-one over each column. Each button sits over the column it acts on:
+one over each column. Each button sits over the column it acts on. For a right
+panel that floats like the sidebar, use [app-shell.md](app-shell.md) instead:
 
 ```text
 [traffic lights] [sidebar]  | Title           [+] [Search...] | [inspector]

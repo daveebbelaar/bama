@@ -81,7 +81,7 @@ snapshot or in the code. Sources are listed at the bottom.
 
 ## Toolbar and panels
 
-44. The toolbar follows the columns: the sidebar button over the sidebar, actions and search over the list, the inspector button at the trailing edge over the inspector. No toolbar item crosses a column edge, and every panel can fold away with a button and a shortcut. Recipe: patterns.md, "Toolbar that follows the columns". [field test]
+44. The toolbar follows the columns: the sidebar button over the sidebar, actions and search over the list, the inspector button at the trailing edge over the inspector. No toolbar item crosses a column edge, and every panel can fold away with a button and a shortcut. Recipe: patterns.md, "Toolbar that follows the columns". When the left and right panels must match, or there is no top bar: app-shell.md. [field test]
 45. Lists support multi-selection, and actions apply to every selected row. After an action removes the selected row, selection moves to the next row. [review]
 46. Never ship always-enabled menu items that do nothing; fix the focused-value plumbing instead. Taking over Command-S or Command-O is allowed only in apps without documents, and is noted in the command map. [review]
 
