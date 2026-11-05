@@ -56,7 +56,7 @@ its two sides differ.
 | On macOS 27.2 | Looks like the sidebar | Differs from the sidebar |
 | On macOS 26.5 | A flat column with a line | Looks like the sidebar |
 | Top bar | Splits at the column line | One bar over the chat and the panel |
-| Width | People drag it | Fixed by your code |
+| Width | People drag it, unless it follows the sidebar | Fixed by your code |
 | Menu command | `InspectorCommands()` | Your own button and shortcut |
 | Color | System | Measured by hand |
 
@@ -69,13 +69,19 @@ main one: put `.inspector` on the `NavigationSplitView`, not on a column.
 
 Measured in LocalChat on macOS 27.2.
 
-- Give the inspector the sidebar's ideal width, with `.inspectorColumnWidth`. With
-  empty settings, a sidebar set to 260 draws 260 wide, and an inspector set to 260
-  draws 260 wide.
-- Check the widths with empty settings. The split view saves the sidebar's width in
-  the app's user defaults, under `NSSplitView Subview Frames`, and a saved width wins
-  over `ideal`. On one Mac Chat kept a saved 268, while a copy with a new bundle id
-  drew 260. To test, copy the app, give the copy a new bundle id, and run the copy.
+- Make the inspector follow the sidebar's real width. Read the sidebar's width with
+  `.onGeometryChange`, and set
+  `.inspectorColumnWidth(min: width, ideal: width, max: width)`. The cost: people
+  cannot drag the inspector to its own width.
+- Do not rely on one shared `ideal` value. The split view saves the sidebar's width
+  in the app's user defaults, under `NSSplitView Subview Frames`, and a saved width
+  wins over `ideal`. With empty settings a sidebar set to 260 draws 260. On one Mac
+  Chat kept a saved 268 with the same setting.
+- Ignore widths under the sidebar's minimum in the reader, so a collapsed sidebar
+  leaves the last width in place.
+- Put `.onGeometryChange` before `.navigationSplitViewColumnWidth`. See "Traps".
+- Probe both status cards with a `=name~` edge, so the check fails when the widths
+  differ: `layout-grid` skill, "Line up across areas".
 - Leave the color to the system. Both columns have the same gray in light and in
   dark (`0xECEDEE` in light).
 - Use the same insets on both sides: status cards 10 pt from the window, 6 pt of
@@ -211,7 +217,8 @@ from one noisy recording, so compare the two sides by eye.
 | Toolbar items cross the panel's line | `.inspector` sits on a column, not on the split view | Move it to the `NavigationSplitView` |
 | A line runs beside the right panel | `.inspector` draws it, and covering it with a view does not hold | On macOS 26.5, use a floating panel if the sides must match. On macOS 27.2 the line is correct, because the sidebar has one too |
 | The right panel floats and the sidebar does not | A floating panel on macOS 27 | Use the inspector |
-| The two column lines sit at different distances from the window's edges | A saved sidebar width wins over `ideal` | Give both columns one ideal width, and check with empty settings |
+| The two column lines sit at different distances from the window's edges | A saved sidebar width wins over `ideal` | Make the inspector follow the sidebar's real width |
+| The sidebar draws 144 pt wide with empty settings, measured on macOS 27.2 | `.onGeometryChange` comes after `.navigationSplitViewColumnWidth`, and the system ignores the setting | Put the reader before it |
 | A probe in the sidebar's `safeAreaInset` keeps its old frame after a snapshot resizes the window | The view does not report its new frame | Add a counter to `GridProbes`, put it in the view's `.id`, and raise it after the resize. Confirm with pixels |
 | A line runs under the top bar | `.scrollEdgeEffectStyle(.hard, for: .top)` | Use the default style, or hide the effect |
 | The content slides past the window's edge | Column minimums add up to more than the window | Raise the window's minimum width |
@@ -231,6 +238,12 @@ macOS version the app supports:
 - Left and right panels match, in front and behind other windows. On macOS 27.2
   check width, color, line, and insets. On macOS 26.5 with a floating panel check
   shape, inset, shadow, and color.
+- On macOS 27, the columns match with empty settings and with a saved width. To get
+  empty settings, copy the app, give the copy a new bundle id, and run the copy. To
+  get a saved width, write `NSSplitView Subview Frames` into the copy's user
+  defaults. LocalChat's status cards ran 10 to 250 pt from each edge with empty
+  settings, 10 to 258 with a saved 268, and 10 to 290 with a saved 300. All of this
+  was by snapshot. Dragging the sidebar with a real mouse is not tested.
 - The content's left and right edges match the chat box's, with scroll bars
   forced on. Its column is centered between the panels.
 - Both panels open, each one closed, and both closed. Each toggle appears once
@@ -243,9 +256,10 @@ macOS version the app supports:
 
 ## Example
 
-Typechecked against the macOS 26.5 SDK, and run on macOS 27.2 with empty settings
-and scroll bars forced on: the text and the chat box share both edges, and both
-columns draw 260 wide. `Space` comes from the template's `UI/Grid.swift`.
+Typechecked against the macOS 26.5 SDK, and run on macOS 27.2 with scroll bars
+forced on: the text and the chat box share both edges. Both columns draw 260 wide
+with empty settings, and 300 wide with a saved 300. `Space` comes from the
+template's `UI/Grid.swift`.
 
 ```swift
 struct ContentView: View {
@@ -253,8 +267,13 @@ struct ContentView: View {
     @State private var search = ""
     @State private var outerWidth: CGFloat = 0
     @State private var innerWidth: CGFloat = 0
+    @State private var sidebarWidth: CGFloat?
     private let readingWidth: CGFloat = 640
-    private let sidebarWidth: CGFloat = 260
+    private let idealSidebarWidth: CGFloat = 260
+    private let minSidebarWidth: CGFloat = 200
+
+    /// The inspector follows the sidebar's real width, because a saved setting can make the sidebar any width.
+    private var panelWidth: CGFloat { sidebarWidth ?? idealSidebarWidth }
 
     /// The same width as the chat box under it.
     private var columnWidth: CGFloat {
@@ -271,7 +290,12 @@ struct ContentView: View {
                         .padding(.horizontal, Space.md)
                         .padding(.bottom, Space.xs)
                 }
-                .navigationSplitViewColumnWidth(min: 200, ideal: sidebarWidth, max: 460)
+                // A collapsed sidebar reports nothing useful, so the panel keeps the last width.
+                .onGeometryChange(for: CGFloat.self) { $0.size.width } action: {
+                    if $0 >= minSidebarWidth { sidebarWidth = $0 }
+                }
+                // This stays last: with the width reader after it, the system ignores it.
+                .navigationSplitViewColumnWidth(min: minSidebarWidth, ideal: idealSidebarWidth, max: 460)
         } detail: {
             page
                 .frame(minWidth: 420)
@@ -287,7 +311,7 @@ struct ContentView: View {
         .inspector(isPresented: $showPanel) {  // on the split view
             Text("Panel")
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .inspectorColumnWidth(min: 200, ideal: sidebarWidth, max: 460)
+                .inspectorColumnWidth(min: panelWidth, ideal: panelWidth, max: panelWidth)
                 .toolbar {
                     ToolbarSpacer(.flexible)  // a lone item would sit at the leading edge
                     ToolbarItem {
