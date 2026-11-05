@@ -14,6 +14,9 @@
 //   5. Stacked probes on one edge are a multiple of the unit apart. Text heights
 //      have fractions and SwiftUI rounds positions, so gaps get 0.5 pt of room.
 //   6. Probes in one area never overlap.
+//   7. Probes whose edge starts with "=" line up across areas, and rules 2 to 6 skip them:
+//      "=name" same left and right, "=name<" same left, "=name>" same right,
+//      "=name|" same center, "=name_" same bottom.
 // Prints PASS or FAIL per file and exits with 1 on any failure.
 
 import Foundation
@@ -65,7 +68,27 @@ for path in paths {
     var problems: [String] = []
     let areas = Dictionary(file.probes.filter { $0.kind == "area" }.map { ($0.area, $0) },
                            uniquingKeysWith: { first, _ in first })
-    let probes = file.probes.filter { $0.kind == "probe" }
+    let probes = file.probes.filter { $0.kind == "probe" && !($0.edge ?? "").hasPrefix("=") }
+    let shared = Dictionary(grouping: file.probes.filter { ($0.edge ?? "").hasPrefix("=") }) { $0.edge! }
+
+    for (edge, group) in shared.sorted(by: { $0.key < $1.key }) where group.count > 1 {
+        func differ(_ what: String, _ value: (Probe) -> Double) {
+            let low = group.map(value).min()!, high = group.map(value).max()!
+            if high - low > tolerance {
+                let list = group.map { "\($0.name) \(fmt(value($0)))" }.joined(separator: ", ")
+                problems.append("\(edge) has different \(what): \(list)")
+            }
+        }
+        switch edge.last {
+        case "<": differ("left edges") { $0.x }
+        case ">": differ("right edges") { $0.maxX }
+        case "|": differ("centers") { $0.x + $0.width / 2 }
+        case "_": differ("bottoms") { $0.maxY }
+        default:
+            differ("left edges") { $0.x }
+            differ("right edges") { $0.maxX }
+        }
+    }
 
     for probe in file.probes where probe.width > 0 {
         if !onGrid(probe.x, step: 0.5, within: pixelTolerance) {
@@ -121,7 +144,7 @@ for path in paths {
 
     let name = (path as NSString).lastPathComponent
     if problems.isEmpty {
-        print("PASS \(name): \(probes.count) probes in \(areas.count) areas")
+        print("PASS \(name): \(probes.count) probes in \(areas.count) areas, \(shared.values.joined().count) lined up across areas")
     } else {
         failedFiles += 1
         print("FAIL \(name)")
