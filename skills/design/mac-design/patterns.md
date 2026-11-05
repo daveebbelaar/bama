@@ -445,7 +445,7 @@ later inside SwiftUI. Test undo in the self-test: do, undo, fetch again.
 
 ## Menu bar extra
 
-Add `MenuBarExtra` next to the main `Window` scene in `App.swift` for an always-available entry point. Let people turn it off in Settings (see "A menu bar icon people can hide" below; do not bind `isInserted:`), and never make it the only way to reach a feature: the app also has a Dock menu (menus.md). The icon is a template SF Symbol, so it follows the menu bar's light and dark look. Show a menu, as below. Use `.menuBarExtraStyle(.window)` only when the feature is too complex for a menu (a timer with controls, a small player). [HIG The menu bar]
+Add `MenuBarExtra` next to the main `Window` scene in `App.swift` for an always-available entry point. Let people turn it off in Settings with an `isInserted:` binding (if that hangs, see "A menu bar icon people can hide" below), and never make it the only way to reach a feature: the app also has a Dock menu (menus.md). The icon is a template SF Symbol, so it follows the menu bar's light and dark look. Show a menu, as below. Use `.menuBarExtraStyle(.window)` only when the feature is too complex for a menu (a timer with controls, a small player). [HIG The menu bar]
 
 ```swift
 struct MenuBarScenePreview: Scene {
@@ -499,16 +499,16 @@ another connection commits, so checking it once a second catches a missed ping.
 
 ### A menu bar icon people can hide
 
-Do not bind `MenuBarExtra(isInserted:)` to a setting. Bound to
-`@AppStorage`, it hung a launcher app at launch at 99% CPU: MenuBarExtra
-writes the binding back while the scene updates, and each write starts
-another scene update (`AppGraph.graphDidChange` in a sample). A guarded
-binding stops the loop, but then the icon never hides, because the App's
-Scene body does not run again when the option changes, neither through
-`@Observable` nor through `@AppStorage`.
+Start with `MenuBarExtra(isInserted:)` bound to `@AppStorage`, as in
+Apple's `MenuBarExtra` example. Change the setting while the app runs and
+check that the icon hides and comes back.
 
-Anything that must change while the app runs lives outside the Scene
-body. Use an `NSStatusItem` that follows the setting:
+One launcher app hung at launch at 99% CPU with this binding. A sample
+showed `AppGraph.graphDidChange` and `makeMainMenu` in a loop. A guarded
+binding stopped the loop, but then the icon did not hide.
+
+If you see this, use an `NSStatusItem` that follows the setting. Use it in
+place of the `MenuBarExtra` scene, so the app has one icon:
 
 ```swift
 final class MenuBarIcon: NSObject {
@@ -547,7 +547,7 @@ Test it without clicking: `NSPerformService("Add to MyApp", pasteboard)` from a 
 
 ### Menu bar extra that keeps the app alive
 
-`MenuBarExtra("App", systemImage: "checklist") { ... }`
+`MenuBarExtra("App", systemImage: "checklist", isInserted: $showMenuBar) { ... }`
 (a menu; add `.menuBarExtraStyle(.window)` only for a feature too complex for one),
 and return `false` from `applicationShouldTerminateAfterLastWindowClosed`
 so closing the main window keeps the menu bar and global shortcuts working.

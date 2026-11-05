@@ -88,7 +88,7 @@ The self-test can press real keys without computer use:
 let event = NSEvent.keyEvent(with: .keyDown, location: .zero, modifierFlags: [],
     timestamp: 0, windowNumber: window.windowNumber, context: nil,
     characters: "\r", charactersIgnoringModifiers: "\r", isARepeat: false, keyCode: 36)!
-window.sendEvent(event)                               // Return in the focused list
+NSApp.sendEvent(event)                                // Return in the focused list
 NSApp.mainMenu?.performKeyEquivalent(with: commandK)  // a menu shortcut
 ```
 
@@ -115,8 +115,9 @@ modifiers, and symbol against the command map. One loop turns "every
 action has a menu item and a shortcut" into a check per item.
 
 Focus the list after making the window key (`window.makeKey()`, then
-`makeFirstResponder(list)`). A search field in the toolbar can take focus
-first, and then list keys and menu items miss the list.
+`makeFirstResponder(list)`). `NSApp.sendEvent` sends a key event to the key
+window, so a key event is lost when no window is key. A search field in the
+toolbar can take focus first, and then list keys and menu items miss the list.
 
 ### Menu check (from outside)
 

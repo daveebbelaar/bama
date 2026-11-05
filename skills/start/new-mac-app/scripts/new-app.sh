@@ -31,6 +31,8 @@ mv "$dest/Tests/__APP_NAME__KitTests" "$dest/Tests/${name}KitTests"
 grep -rlI -e "__APP_NAME__" -e "__BUNDLE_ID__" "$dest" | while IFS= read -r f; do
   sed -i '' -e "s/__APP_NAME__/$name/g" -e "s/__BUNDLE_ID__/$bundle/g" "$f"
 done
+# A different grep on PATH can find nothing, and then the loop does no work.
+[[ $(<"$dest/Package.swift") != *__APP_NAME__* ]] || { echo "could not replace the placeholders in $dest: check which grep is on PATH"; exit 1; }
 chmod +x "$dest/build.sh" "$dest/tools/make_icon.sh" "$dest/tools/icon_review.sh" "$dest/tools/grid-lint.sh" "$dest/tools/check-layout.swift" "$dest/tools/snap.sh" "$dest/tools/selftest.sh"
 
 cd "$dest"
