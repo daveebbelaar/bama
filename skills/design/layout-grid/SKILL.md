@@ -112,6 +112,7 @@ Composer().gridProbe("composer", area: "", edge: "=reading")
 | `=name>` | right |
 | `=name\|` | center |
 | `=name_` | bottom |
+| `=name~` | width |
 
 These probes skip rules 2 to 6, so a view off the 4 pt grid can still match a
 system edge. To check one view against two groups, add a second `.gridProbe` with
@@ -122,6 +123,16 @@ moves centered content (`mac-design`, app-shell.md):
 
 ```bash
 tools/snap.sh -AppleShowScrollBars Always
+```
+
+Pass test values by environment variable. AppKit treats a plain word after the
+binary as a file to open, and on macOS 27.2 the window then never opens, so no
+snapshots come out. A `-Key value` pair like the one above and a `--flag` both
+open the window.
+
+```bash
+APP_SAMPLE=long ~/Applications/<App>.app/Contents/MacOS/<App>   # opens the window
+~/Applications/<App>.app/Contents/MacOS/<App> long              # no window on macOS 27.2
 ```
 
 The probes keep one frame per name across all windows. When a second window shows
@@ -151,6 +162,8 @@ each probe in pink with its name. Open them with the Read tool.
 | overlap | `.offset`, `.position`, or a fixed height | remove it, let the stack size the view |
 | x between pixels | a fractional number | a whole number from `Space` |
 | `=name` has different left edges | a scroll bar that takes width, or a panel's gap on the content's side | `mac-design`, app-shell.md, "Line up the content" |
+| `=name~` has different widths | two columns sized apart, or a saved width that wins over `ideal` | `mac-design`, app-shell.md, "Inspector on macOS 27" |
+| no window and no snapshots | a plain word after the binary | pass the value by environment variable |
 
 Done when `tools/grid-lint.sh` passes, `tools/check-layout.swift` passes
 on the layout files of every page you touched, and every custom page and

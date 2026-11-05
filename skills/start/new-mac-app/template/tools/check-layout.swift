@@ -16,7 +16,7 @@
 //   6. Probes in one area never overlap.
 //   7. Probes whose edge starts with "=" line up across areas, and rules 2 to 6 skip them:
 //      "=name" same left and right, "=name<" same left, "=name>" same right,
-//      "=name|" same center, "=name_" same bottom.
+//      "=name|" same center, "=name_" same bottom, "=name~" same width.
 // Prints PASS or FAIL per file and exits with 1 on any failure.
 
 import Foundation
@@ -84,6 +84,7 @@ for path in paths {
         case ">": differ("right edges") { $0.maxX }
         case "|": differ("centers") { $0.x + $0.width / 2 }
         case "_": differ("bottoms") { $0.maxY }
+        case "~": differ("widths") { $0.width }
         default:
             differ("left edges") { $0.x }
             differ("right edges") { $0.maxX }
