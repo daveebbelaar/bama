@@ -38,6 +38,9 @@ nonisolated enum AgentSocket {
         unlink(path)
         let server = socket(AF_UNIX, SOCK_STREAM, 0)
         guard server >= 0, var address = try? address(path) else { return }
+        // Accepted sockets inherit this. Setting it on them is too late when
+        // the client has already gone: setsockopt then fails.
+        noSigPipe(server)
         let bound = withUnsafePointer(to: &address) {
             $0.withMemoryRebound(to: sockaddr.self, capacity: 1) { bind(server, $0, socklen_t(MemoryLayout<sockaddr_un>.size)) }
         }
@@ -84,6 +87,7 @@ nonisolated enum AgentSocket {
         let client = socket(AF_UNIX, SOCK_STREAM, 0)
         guard client >= 0 else { throw AgentError.unavailable("no socket") }
         defer { close(client) }
+        noSigPipe(client)
         var address = try address(path)
         let connected = withUnsafePointer(to: &address) {
             $0.withMemoryRebound(to: sockaddr.self, capacity: 1) { connect(client, $0, socklen_t(MemoryLayout<sockaddr_un>.size)) }
@@ -120,6 +124,14 @@ nonisolated enum AgentSocket {
     }
 
     // MARK: Bytes
+
+    /// A write to a socket whose other end has closed raises SIGPIPE, and that
+    /// signal quits the whole process. The CLI closes early on Ctrl-C or after
+    /// its 30 second timeout, and the app would quit. Ask for an EPIPE error instead.
+    private static func noSigPipe(_ socket: Int32) {
+        var on: Int32 = 1
+        setsockopt(socket, SOL_SOCKET, SO_NOSIGPIPE, &on, socklen_t(MemoryLayout<Int32>.size))
+    }
 
     private static func readLine(_ socket: Int32) -> Data {
         var data = Data()
