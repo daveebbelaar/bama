@@ -41,6 +41,8 @@ enum SelfTest {
                 check("deleting the item removes it", items().count == before)
             }
             check("titles are cleaned", ItemTitle.clean("  Buy   milk ") == "Buy milk")
+            check("tooltips show after half a second",
+                  UserDefaults.standard.integer(forKey: "NSInitialToolTipDelay") == AppDelegate.toolTipDelay)
 
             print(failures == 0 ? "SELFTEST PASS \(count) checks" : "SELFTEST FAIL \(failures) of \(count) checks")
             finish(code: failures == 0 ? 0 : 1)

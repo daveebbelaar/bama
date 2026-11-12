@@ -132,8 +132,38 @@ only, and a new user could say what each button does.
 - Hover feedback shows at once and never shifts the layout.
 - Information people need is always visible. Hover only adds detail.
 
-Check: hover every icon-only control on the snapshot build. Each one shows
-a tooltip.
+Two things make working tooltips look broken:
+
+- **Delay.** The system delay is often 2 to 3.5 s, and people move on
+  before that. The template sets 500 ms (`NSInitialToolTipDelay` in
+  `AppDelegate`). In other apps, register the same default in
+  `applicationWillFinishLaunching`.
+- **Idle redraws.** A redraw resets the tooltip timer. A repeating `Timer`,
+  `TimelineView(.periodic)`, polling loop, or stream callback that writes
+  `@Observable` or `@Published` state while nothing changes redraws the
+  window all the time, and no tooltip ever shows. Everything else still
+  looks fine. Stop clocks when idle, and write state only when the value
+  changes (`performance` skill, "Timers, polling, and energy").
+
+Check: run the installed build and activate its window. Hover every
+icon-only control and keep the pointer still for 4 s. Each one shows the
+expected text. Hover again after the app has done its main work (playback
+ended, a sync finished), because a clock left running stops tooltips from
+then on. For toolbar changes, repeat after updates such as play/pause and
+sidebar visibility. Check disabled controls where help explains their
+purpose or availability.
+
+Use the real pointer. Do not post synthetic mouse events or bring the app
+forward while the user works. Run `tools/tooltip-watch.swift <AppName>`,
+which only reads window and pointer state, and ask the user to hover the
+controls. It prints when each tooltip window appears and how long after
+the pointer stopped.
+
+Record visible hover results separately from supporting evidence: source
+inspection, accessibility labels, screenshots without a visible tooltip,
+and native tooltip registration checks. If hover cannot be tested, report
+it as unverified. When toolbar help is missing, follow
+[Toolbar help troubleshooting](../mac-design/toolbars.md#toolbar-help-troubleshooting).
 
 ## 7. Check accessibility
 
@@ -163,4 +193,5 @@ UX:
 ```
 
 Done when the story has a `UX:` block, every term it uses is in
-`docs/GLOSSARY.md`, and steps 1 to 7 pass on its snapshots.
+`docs/GLOSSARY.md`, and steps 1 to 7 pass on the installed build, with snapshots reviewed
+where required.

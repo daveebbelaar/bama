@@ -6,6 +6,7 @@ import SwiftUI
 //   __APP_NAME__                      the app
 //   APP_STORE=<file> __APP_NAME__     use another database (tests, experiments)
 //   APP_SNAPSHOT=<dir> __APP_NAME__   save a PNG of every sidebar page and Settings tab in light and dark mode, then quit
+//                                     (in the background; add APP_SNAPSHOT_ACTIVE=1 for the active-window look)
 //   APP_SEED=1 __APP_NAME__           fill an empty /tmp store with sample items (tools/snap.sh)
 //   __APP_NAME__ --selftest           run the self-test on a /tmp store and quit with 0 or 1 (tools/selftest.sh)
 //   APP_ACCENT=<id> __APP_NAME__      run with another accent from Theme.all (UI/Theme.swift)
@@ -46,7 +47,34 @@ struct __APP_NAME__App: App {
 }
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
+    /// Milliseconds before a `.help` tooltip shows. The system delay is often
+    /// 2 to 3.5 s, which people take for "tooltips do not work".
+    /// `defaults write <bundle id> NSInitialToolTipDelay -int <ms>` still overrides it.
+    static let toolTipDelay = 500
+
+    /// Self-tests and background snapshots run as an accessory app: no Dock icon,
+    /// no menu bar, and the person at the Mac keeps their focus.
+    private var runsInBackground: Bool { SelfTest.requested || Snapshot.inBackground }
+
+    func applicationWillFinishLaunching(_ notification: Notification) {
+        UserDefaults.standard.register(defaults: ["NSInitialToolTipDelay": Self.toolTipDelay])
+        guard runsInBackground else { return }
+        NSApp.setActivationPolicy(.accessory)
+        // SwiftUI still activates the app when it shows the window.
+        // Hand focus straight back to the app the person was using.
+        let previous = NSWorkspace.shared.frontmostApplication
+        NotificationCenter.default.addObserver(forName: NSApplication.didBecomeActiveNotification,
+                                               object: nil, queue: .main) { _ in
+            MainActor.assumeIsolated {
+                guard let previous, !previous.isTerminated else { NSApp.deactivate(); return }
+                NSApp.yieldActivation(to: previous)
+                previous.activate()
+            }
+        }
+    }
+
     func applicationDidFinishLaunching(_ notification: Notification) {
+        guard !runsInBackground else { return }
         // Started from a terminal, the process is not a foreground app yet.
         NSApp.setActivationPolicy(.regular)
         NSApp.activate()

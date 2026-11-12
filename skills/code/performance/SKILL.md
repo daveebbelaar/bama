@@ -57,7 +57,9 @@ reproduce -> measure (release build) -> find the line -> fix -> measure again ->
 - **Do not animate what must be fast.** Search results and switchers
   update in place.
 - **No polling without a reason.** Timers get a tolerance and stop when
-  nothing on screen needs them.
+  nothing on screen needs them. A clock that writes observed state while
+  idle also redraws the window all the time, and that stops every `.help`
+  tooltip from showing.
 
 ## Apple silicon notes
 
