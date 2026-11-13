@@ -149,7 +149,7 @@ activate its window, and follow
 Record the expected text and actual hover result for each icon-only control,
 including relevant toolbar updates and disabled controls where help explains
 availability. Require passing visible hover results before declaring toolbar
-changes complete. Use the real pointer with `tools/tooltip-watch.swift`
+changes complete. Use the real pointer with `swift tools/tooltip-watch.swift`
 and the user, never synthetic events. If hover cannot be tested, report it
 as unverified.
 

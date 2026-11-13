@@ -154,7 +154,7 @@ sidebar visibility. Check disabled controls where help explains their
 purpose or availability.
 
 Use the real pointer. Do not post synthetic mouse events or bring the app
-forward while the user works. Run `tools/tooltip-watch.swift <AppName>`,
+forward while the user works. Run `swift tools/tooltip-watch.swift <AppName>`,
 which only reads window and pointer state, and ask the user to hover the
 controls. It prints when each tooltip window appears and how long after
 the pointer stopped.

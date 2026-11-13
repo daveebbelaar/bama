@@ -42,7 +42,7 @@ Mac away from them. Choose the test that does not need focus:
 - Snapshots need no focus: `screencapture -l` captures a covered,
   inactive window. Only the active-look run (`APP_SNAPSHOT_ACTIVE=1`)
   takes focus.
-- Hover checks use the real pointer. Run `tools/tooltip-watch.swift`, which
+- Hover checks use the real pointer. Run `swift tools/tooltip-watch.swift`, which
   only reads state, and ask the user to hover. Never post `CGEvent`s or
   make another app frontmost to fake a hover, unless the user agrees.
 - When a test does need focus (the active-look snapshots, a permission
