@@ -6,12 +6,14 @@ allowed-tools: Bash(./build.sh*) Bash(swift *) Bash(tools/*) Bash(*/Contents/Mac
 
 # Build and verify
 
-A change is done when four things are true:
+A change is done when five things are true:
 
 1. `./build.sh` finishes with no errors.
 2. You looked at the light and dark snapshots of every page you touched.
 3. The snapshots match what the user story or reference screenshot asks for.
 4. The grid checks pass (`layout-grid` skill).
+5. Toolbar changes have a passing visible hover result from the installed
+   build, including relevant toolbar state changes (step 5).
 
 App not made from the `new-mac-app` template (Xcode, XcodeGen, a menu bar
 utility, Swift 5)? Map the commands below with
@@ -34,6 +36,19 @@ errors often come from it. If a new file is "not in scope" right after you
 created it, run `swift package clean --scratch-path ~/Library/Developer/<AppName>/build`.
 
 ## 2. Snapshot
+
+Snapshots run in the background. `screencapture -x -o -l <window>` captures
+a window that is not key and is covered by other windows, so the app runs
+as an accessory app and hands focus straight back (about 0.1 s at launch).
+The user keeps working. Windows show their inactive look: gray selection
+and gray prominent buttons. That is fine for layout and grid checks.
+
+For the final review of a finished change, run once with
+`APP_SNAPSHOT_ACTIVE=1`. The app comes to the front and each window is key,
+so you see real accent colors and focus rings. That takes the user's focus:
+tell them before the run, and snapshot only the pages you changed
+(`APP_SNAPSHOT_PAGES`). See "Leave the user's mouse and keyboard alone" in
+the `test-mac-app` skill.
 
 Run the installed binary directly with a test database and a folder for the
 images. The app opens, walks through every sidebar page and every Settings
@@ -92,9 +107,9 @@ from outside the app (like `window-shot.sh`), run `caffeinate -u -t 2` first.
 
 If some states print "no window" while others work, another app hid yours
 during the run. Computer use does this to apps it does not control, and so
-does Hide Others. The template's snapshot mode un-hides the app and brings
-the window forward before each capture. Run it again, and avoid using
-computer use in another session at the same time.
+does Hide Others. The template's snapshot mode un-hides the app (without
+activating it) before each capture. Run it again, and avoid using computer
+use in another session at the same time.
 
 ## 3. Check the grid
 
@@ -126,13 +141,32 @@ every check passes) and add a check for each new action. The
 `test-mac-app` skill covers unit tests, the self-test, key events, the
 menu check from outside, and a debug bridge.
 
+### Toolbar tooltips
+
+After adding or changing toolbar controls, run the installed build,
+activate its window, and follow
+[Add hover help](../../design/ux-design/SKILL.md#6-add-hover-help).
+Record the expected text and actual hover result for each icon-only control,
+including relevant toolbar updates and disabled controls where help explains
+availability. Require passing visible hover results before declaring toolbar
+changes complete. Use the real pointer with `swift tools/tooltip-watch.swift`
+and the user, never synthetic events. If hover cannot be tested, report it
+as unverified.
+
+Source inspection, accessibility labels, screenshots without a visible
+tooltip, and native registration checks support the result but do not
+replace visible hover verification. For a reproduced failure, follow
+[Toolbar help troubleshooting](../../design/mac-design/toolbars.md#toolbar-help-troubleshooting),
+then repeat hover checks and state transitions.
+
 ### Inactive windows
 
 Gray traffic lights mean the window was not key when it was captured:
-sidebar text, selection, and toggles look dimmer than in use. A snapshot of
-an inactive window does not count as reviewed. Run the snapshots again
-while nobody else uses the screen, and do not "fix" dim text you only see
-there.
+sidebar text, selection, and toggles look dimmer than in use. Background
+snapshots always look like this. Use them for layout, spacing, and the
+grid, and do not "fix" dim text or gray buttons you only see there. Colors,
+contrast, and selection count as reviewed only on an
+`APP_SNAPSHOT_ACTIVE=1` run.
 
 ### Debug output and private screens
 
@@ -150,4 +184,4 @@ When the build is clean and the snapshots look right, commit with a message
 that says what the user can now do: "Add tasks from the quick-add panel",
 not "Update views".
 
-Done when the four conditions at the top hold and the change is committed.
+Done when the five conditions at the top hold and the change is committed.

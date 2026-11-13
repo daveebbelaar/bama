@@ -153,6 +153,12 @@ actor unless you say otherwise.
   so macOS can group wake-ups.
 - Sample system stats only while someone looks at them (menu open, page
   visible). Stop the timer when the popover closes.
+- A UI clock (playback position, elapsed time, progress) runs only while
+  the value changes. Start it on play, invalidate it on pause, stop, and
+  end of playback. Write observed properties only when the value changes:
+  `if position != new { position = new }`. Each write redraws the view,
+  and redraws reset the tooltip timer, so a clock left running stops all
+  tooltips. Add a self-test check that the clock stops after playback ends.
 - Prefer notifications to polling: `NSWorkspace` notifications for app
   launch and activation, Darwin notifications (`notify_post`) for pings
   from a CLI, `NSPasteboard.changeCount` checks at most twice a second.

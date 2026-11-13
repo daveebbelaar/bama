@@ -18,6 +18,39 @@ can prove its acceptance criteria. A bug fix starts with a test that fails.
 Snapshots (`build-and-verify` skill) prove how it looks. This skill proves
 how it behaves.
 
+## Leave the user's mouse and keyboard alone
+
+The user keeps working while tests run. A run that activates the app, makes
+a window key, moves the cursor, or types into the frontmost app takes the
+Mac away from them. Choose the test that does not need focus:
+
+- Run logic, self-test, and event checks in the background. Never call
+  `NSApp.activate`, `activate(ignoringOtherApps:)`, `makeKeyAndOrderFront`, or
+  `open -a` just to make a check pass. Launch the binary directly; do not
+  bring it forward.
+- Drive mouse gestures from inside the self-test: build `NSEvent.mouseEvent`
+  for `.leftMouseDown`, `.leftMouseDragged`, and `.leftMouseUp` with the
+  window's `windowNumber` and send them to `window.sendEvent`. The real
+  cursor never moves, and drags, trims, and clicks are tested without the
+  screen. Check the model afterwards, not the pixels.
+- Key events go to `window.sendEvent` (or `NSApp.sendEvent` when the window
+  is key). If a check truly needs a key window, make only that window key
+  with `orderFrontRegardless` and `makeKey`, and do not activate the app.
+- Never use `CGEvent.post`, `cliclick`, AppleScript `System Events`
+  keystrokes, or computer use where a self-test event would do. They move
+  the real cursor and type into whatever app is in front.
+- Snapshots need no focus: `screencapture -l` captures a covered,
+  inactive window. Only the active-look run (`APP_SNAPSHOT_ACTIVE=1`)
+  takes focus.
+- Hover checks use the real pointer. Run `swift tools/tooltip-watch.swift`, which
+  only reads state, and ask the user to hover. Never post `CGEvent`s or
+  make another app frontmost to fake a hover, unless the user agrees.
+- When a test does need focus (the active-look snapshots, a permission
+  prompt, drag and drop from Finder), say so
+  before running it, name what will happen ("VoiceStudio will come to the
+  front for about 30 seconds"), batch every such check into one run, and
+  return focus to the app that was in front when the run ends.
+
 ## 1. Unit tests
 
 Logic lives in a library target (`<App>Kit`) with no SwiftUI, so tests run
@@ -183,7 +216,9 @@ Compile the bridge in debug builds, or behind a launch flag in release.
 ## 4. Computer use
 
 Last resort, for what only a person can do: a real key press in another
-app, drag and drop from Finder, a permission prompt. See the `clone` skill
+app, drag and drop from Finder, a permission prompt. It takes the user's
+mouse and keyboard, so ask first, and use self-test events for anything
+inside the app. See the `clone` skill
 for setup. Tell the user to keep off the mouse while it runs. Capture your
 own window, never the full screen.
 

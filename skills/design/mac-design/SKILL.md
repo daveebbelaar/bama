@@ -191,9 +191,9 @@ Snapshot every surface in light and dark: each page, the menu bar menu,
 each panel and overlay (launcher, toasts, cards), editors, and each
 Settings tab (snapshot mode does pages and Settings tabs). Look for focus
 rings, selected text, scroll bars with nothing to scroll, and empty bands
-under short content. Capture each window as the key window: a snapshot of
-an inactive window (gray traffic lights, dim toggles) or with flattened
-glass does not count as reviewed. Views that pause while covered show a
+under short content. Review colors and contrast on key windows
+(`APP_SNAPSHOT_ACTIVE=1`): a snapshot of an inactive window (gray traffic
+lights, dim toggles) or with flattened glass does not count for them. Views that pause while covered show a
 placeholder; that one is expected.
 
 Done when every rule in [design-rules.md](design-rules.md) holds on the

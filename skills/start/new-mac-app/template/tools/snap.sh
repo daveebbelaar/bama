@@ -3,6 +3,8 @@
 # Usage: tools/snap.sh            all pages
 #        APP_SNAPSHOT_PAGES=all,settings tools/snap.sh
 #        tools/snap.sh -AppleShowScrollBars Always     see the scroll bars as people with a mouse see them
+#        APP_SNAPSHOT_ACTIVE=1 tools/snap.sh           active-window look for the final review (takes focus)
+# Without APP_SNAPSHOT_ACTIVE the run stays in the background and windows show their inactive look.
 set -u
 app=~/Applications/__APP_NAME__.app/Contents/MacOS/__APP_NAME__
 store=/tmp/__APP_NAME__-test.store

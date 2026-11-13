@@ -35,6 +35,7 @@ binary in a real `.app` bundle. An agent can read and edit every file.
   tools/
     grid-lint.sh         flags spacing numbers off the 4 pt grid
     check-layout.swift   checks the layout files from snapshot mode
+    tooltip-watch.swift  read-only: logs tooltip windows while a person hovers
     make_icon.sh         Icon/AppIcon.icon -> Resources/Assets.car + AppIcon.icns (actool)
     icon_review.sh       renders every icon look into one PNG (ictool)
     icon_sheet.swift     joins the renders for icon_review.sh

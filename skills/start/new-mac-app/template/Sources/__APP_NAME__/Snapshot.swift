@@ -10,6 +10,17 @@ import SwiftUI
 /// APP_SNAPSHOT_PAGES=all,starred limits the pages. Add "settings" to include Settings.
 /// Add APP_ACCENT=<id> to see the pages in another accent.
 enum Snapshot {
+    /// Snapshot runs stay in the background, like the self-test, so the person keeps
+    /// their focus. Windows then show their inactive look (gray selection and
+    /// prominent buttons): fine for layout checks. APP_SNAPSHOT_ACTIVE=1 brings the
+    /// app to the front for the final review of the active look.
+    static var requested: Bool {
+        let env = ProcessInfo.processInfo.environment
+        return !(env["APP_SNAPSHOT"] ?? "").isEmpty && !(env["APP_STORE"] ?? "").isEmpty
+    }
+    static var active: Bool { ProcessInfo.processInfo.environment["APP_SNAPSHOT_ACTIVE"] == "1" }
+    static var inBackground: Bool { requested && !active }
+
     static func runIfRequested(model: AppModel, openSettings: OpenSettingsAction) {
         let env = ProcessInfo.processInfo.environment
         guard let dir = env["APP_SNAPSHOT"], !dir.isEmpty else { return }
@@ -72,9 +83,12 @@ enum Snapshot {
             print("SNAPSHOT no window")
             return
         }
-        // Active, like a window someone is using: real accent colors and focus rings.
-        NSApp.activate()
-        window.makeKeyAndOrderFront(nil)
+        // screencapture -l reads the window's own image, even when the window is
+        // not key and other windows cover it. Only the active-look run raises it.
+        if active {
+            NSApp.activate()
+            window.makeKeyAndOrderFront(nil)
+        }
         let size = window.contentView?.bounds.size ?? .zero
         GridProbes.shared.write(to: path.replacingOccurrences(of: ".png", with: "-layout.json"), window: size)
         try? FileManager.default.removeItem(atPath: path)

@@ -10,6 +10,7 @@ Placement changed between 26.0 and 26.2: snapshot the toolbar after each OS upda
 - Toggles
 - Glass groups
 - Labels
+- Toolbar help troubleshooting
 - Title and search
 - Not iOS
 - Review
@@ -94,6 +95,42 @@ On macOS 26 toolbar items float on Liquid Glass, and neighbors share one capsule
 - A text button next to a symbol button gets a `ToolbarSpacer(.fixed)` between them.
 - A primary action (Done, Send) is one item, trailing, alone, prominent. Most
   main windows have none. "New" is not a primary action.
+
+## Toolbar help troubleshooting
+
+After adding or changing toolbar controls, verify visible hover help with
+the installed build active. Follow the procedure in
+[Add hover help](../ux-design/SKILL.md#6-add-hover-help), including toolbar
+state changes and disabled controls where help explains availability.
+
+When help is missing, first rule out the two common causes in
+[Add hover help](../ux-design/SKILL.md#6-add-hover-help): a slow tooltip
+delay, and idle redraws from a clock that keeps writing observed state.
+Both make every tooltip in the window look broken, not one toolbar item.
+
+If only some toolbar items fail, reproduce the failure and inspect the affected
+`NSToolbarItem` and its host view. Check whether toolbar updates clear or
+replace tooltip registration. Empty native `toolTip` properties alone do
+not prove that SwiftUI cannot display help through another mechanism.
+Apply a native fallback only when the observations justify it.
+
+On an affected SwiftUI toolbar, retain `.help(...)` and register the same
+text through public AppKit APIs after SwiftUI creates its toolbar items:
+
+```swift
+item.toolTip = text
+item.view?.toolTip = text
+item.view?.setAccessibilityHelp(text)
+```
+
+Keep the text in one source of truth. Associate help with the correct
+action using stable public identifiers where available. Reapply registration
+after relevant toolbar updates. Use public APIs rather than private SwiftUI
+class names, positional item indexes, or overlays that intercept interaction.
+
+Repeat hover checks and state transitions after the fix. Automated
+registration checks are supporting evidence; record actual tooltip display
+separately and report it as unverified if hover cannot be tested.
 
 ## Title and search
 
@@ -199,3 +236,4 @@ struct ContentView: View {
 - Landmarks toolbar sample: https://developer.apple.com/documentation/swiftui/landmarks-refining-the-system-provided-glass-effect-in-toolbars
 - Inspector toggle placement across macOS 26 releases: https://developer.apple.com/forums/thread/795561
 - Field test: Brisk commit f9f264b, and placement snapshots on macOS 26.5
+- AppKit: [NSToolbarItem.toolTip](https://developer.apple.com/documentation/appkit/nstoolbaritem/tooltip)

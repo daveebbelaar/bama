@@ -19,9 +19,11 @@ SwiftData database and no server.
 - Self-test (the app's real functions on a /tmp store): `tools/selftest.sh`. Exit 0 when every check passes. Add a check for every story with logic in `SelfTest.swift`.
 - After every UI change, take snapshots with sample data and look at them: `tools/snap.sh`.
   It writes `/tmp/__APP_NAME__-shots/<page>-light.png` and `-dark.png` for every sidebar page, and `settings-<tab>-light.png` and `-dark.png` for every Settings tab, then quits. `APP_SNAPSHOT_PAGES=all,settings tools/snap.sh` limits the pages.
+  Snapshots run in the background and show the inactive window look. For the final review of colors and contrast, run once with `APP_SNAPSHOT_ACTIVE=1`, which brings the app to the front.
   For a panel, sheet, or popover, add a capture to `Snapshot.swift` like the Settings loop.
 - Snapshots, seed data, and the self-test refuse to run without `APP_STORE` in /tmp.
 - Never test against the real database in `~/Library/Application Support/__APP_NAME__/`.
+- Tooltips: `.help` on every icon-only control. They show after 500 ms (`AppDelegate.toolTipDelay`). A timer or polling loop that writes observed state while idle stops all tooltips, so stop clocks when nothing changes. To check hover, run `swift tools/tooltip-watch.swift` and ask the user to hover; never post synthetic mouse events.
 - Then check the grid: `tools/grid-lint.sh` and `swift tools/check-layout.swift /tmp/__APP_NAME__-shots/*-layout.json`. Both print PASS.
 - A change is done when the build has no errors, the grid checks pass, and you looked at the light and dark snapshots.
 

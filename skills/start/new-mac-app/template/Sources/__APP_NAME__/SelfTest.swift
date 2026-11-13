@@ -41,6 +41,11 @@ enum SelfTest {
                 check("deleting the item removes it", items().count == before)
             }
             check("titles are cleaned", ItemTitle.clean("  Buy   milk ") == "Buy milk")
+            // The registered default, not the effective value: a person's own
+            // `defaults write` override must not fail the self-test.
+            let registered = UserDefaults.standard.volatileDomain(forName: UserDefaults.registrationDomain)
+            check("tooltips show after half a second by default",
+                  registered["NSInitialToolTipDelay"] as? Int == AppDelegate.toolTipDelay)
 
             print(failures == 0 ? "SELFTEST PASS \(count) checks" : "SELFTEST FAIL \(failures) of \(count) checks")
             finish(code: failures == 0 ? 0 : 1)
